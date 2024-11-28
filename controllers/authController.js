@@ -1,7 +1,6 @@
 const authService = require('../services/authService');
 const upload = require('../middlewares/authMiddleware');
 
-
 const authController = {
     signUp: async (req, res) => {
         upload(req, res, async (err) => {

@@ -60,6 +60,7 @@ const User = sequelize.define('User', {
         allowNull: true,
     }
 }, {
+    ableName: 'users', 
     timestamps: false // Disable automatic timestamps
 });
 
