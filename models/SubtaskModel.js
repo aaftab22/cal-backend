@@ -10,6 +10,9 @@ const Subtask = sequelize.define('Subtask', {
     Related_Task: {
         type: DataTypes.INTEGER,
         allowNull: true,
-    }
-})
+    },
+}, {
+    tableName: 'subtasklist',
+});
+
 module.exports = Subtask;
