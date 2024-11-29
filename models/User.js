@@ -60,7 +60,7 @@ const User = sequelize.define('User', {
         allowNull: true,
     }
 }, {
-    ableName: 'users', 
+    tableName: 'users', 
     timestamps: false
 });
 
