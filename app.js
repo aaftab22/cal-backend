@@ -7,15 +7,24 @@ const taskRoutes = require('./routes/taskListRoutes');
 const dbRoutes = require('./routes/dbRoutes');
 const serviceRoutes = require('./routes/serviceRoutes')
 const cors = require('cors');
-
-
 const dotenv = require('dotenv');
 
 dotenv.config();
 
 const app = express();
+
 app.use(bodyParser.json());
-app.use(cors())
+
+const allowedOrigins = [
+    'https://cal-frontend-eight.vercel.app',
+  ];
+  app.use(
+    cors({
+      origin: allowedOrigins,
+      methods: ['GET', 'POST', 'PUT', 'DELETE'],
+      credentials: true,
+    })
+  );
 
 app.use('/api/auth', authRoutes);
 app.use('/api/projects', projectRoutes);
