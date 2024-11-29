@@ -54,7 +54,6 @@ const authService = {
             type: sequelize.QueryTypes.SELECT,
         });
     },
-
    
 };
 
