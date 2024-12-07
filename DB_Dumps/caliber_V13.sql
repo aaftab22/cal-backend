@@ -3,7 +3,7 @@
 -- Host: localhost    Database: caliber
 -- ------------------------------------------------------
 -- Server version	8.0.31
-
+use caliber;
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
 /*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
@@ -43,6 +43,41 @@ CREATE TABLE `project_attachments` (
 LOCK TABLES `project_attachments` WRITE;
 /*!40000 ALTER TABLE `project_attachments` DISABLE KEYS */;
 /*!40000 ALTER TABLE `project_attachments` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `project_shifts`
+--
+
+DROP TABLE IF EXISTS `project_shifts`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `project_shifts` (
+  `Shift_ID` int NOT NULL AUTO_INCREMENT,
+  `Employee_Assigned` int DEFAULT NULL,
+  `Project_ID` int DEFAULT NULL,
+  `Task_Assigned` int DEFAULT NULL,
+  `Time_Start` datetime DEFAULT NULL,
+  `Time_Finish` datetime DEFAULT NULL,
+  PRIMARY KEY (`Shift_ID`),
+  UNIQUE KEY `unique_shift_combination` (`Employee_Assigned`,`Project_ID`,`Task_Assigned`,`Time_Start`,`Time_Finish`),
+  KEY `Employee_Assigned` (`Employee_Assigned`),
+  KEY `Project_ID` (`Project_ID`),
+  KEY `Task_Assigned` (`Task_Assigned`),
+  CONSTRAINT `project_shifts_ibfk_1` FOREIGN KEY (`Employee_Assigned`) REFERENCES `users` (`ID`),
+  CONSTRAINT `project_shifts_ibfk_2` FOREIGN KEY (`Project_ID`) REFERENCES `projects` (`PROJECT_ID`),
+  CONSTRAINT `project_shifts_ibfk_3` FOREIGN KEY (`Task_Assigned`) REFERENCES `tasklist` (`TASK_ID`)
+) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `project_shifts`
+--
+
+LOCK TABLES `project_shifts` WRITE;
+/*!40000 ALTER TABLE `project_shifts` DISABLE KEYS */;
+INSERT INTO `project_shifts` VALUES (11,2,4,1,'2024-11-04 09:00:00','2024-11-04 11:00:00'),(12,3,4,2,'2024-11-05 09:00:00','2024-11-05 17:00:00'),(1,5,1,1,'2024-01-10 09:00:00','2024-01-10 14:00:00'),(2,5,1,1,'2024-01-13 09:00:00','2024-01-13 11:00:00'),(3,5,1,1,'2024-01-15 09:00:00','2024-01-15 14:00:00'),(4,6,1,1,'2024-01-12 14:00:00','2024-01-12 16:00:00'),(5,7,1,2,'2024-01-12 09:00:00','2024-01-12 12:00:00'),(6,7,1,2,'2024-01-12 13:00:00','2024-01-12 17:00:00'),(8,7,2,3,'2024-01-20 09:00:00','2024-01-20 16:00:00'),(9,7,2,3,'2024-01-21 09:00:00','2024-01-21 12:00:00'),(7,8,1,2,'2024-01-13 11:00:00','2024-01-13 14:00:00'),(10,8,2,3,'2024-01-12 13:00:00','2024-01-12 17:00:00');
+/*!40000 ALTER TABLE `project_shifts` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -133,7 +168,7 @@ CREATE TABLE `projects` (
 
 LOCK TABLES `projects` WRITE;
 /*!40000 ALTER TABLE `projects` DISABLE KEYS */;
-INSERT INTO `projects` VALUES (1,'Hi','123 Queen St, Toronto','L4R 7T6','123-456-7890','daniel@example.com','2024-11-19 17:17:33',1,'2024-11-19 17:17:33','Pending'),(2,'Development of a recreational park with a children’s play area and a walking track.','753 Cherry Ave, City 10','P8Q 9R1','519-890-1234','user10@example.com','2024-11-19 18:14:47',9,'2024-11-19 18:14:47','Pending'),(3,'Renovation of a residential house to include new flooring and updated lighting fixtures.','123 Maple St, City 3','B2C 3D4','613-123-4567','user3@example.com','2024-11-19 18:17:54',2,'2024-11-19 18:17:54','Pending'),(4,'High-Rise Building Construction','102 Sky Avenue, Downtown','A1B 2C3','123-456-7890','manager@highrisebuilders.com','2024-11-19 18:21:37',1,'2024-11-19 18:21:37','Pending'),(5,'Renovation of Maple Community Centre, including interior redesign, electrical upgrades, and landscaping to enhance functionality and aesthetics.','75 Maplewood Avenue, Toronto, ON','M4Y 1A7','416-789-1234','admin@maplerenovations.ca','2024-11-19 18:27:31',1,'2024-11-19 18:27:31','Pending'),(6,'Development of the Oakwood Public Library, focusing on structural improvements, modern technology installations, and accessibility enhancements for better community use.','123 Oakwood Drive, Ottawa, ON','K1Y 4E4','613-456-7890','info@oakwoodlibrary.ca','2024-11-19 18:29:29',1,'2024-11-19 18:29:29','Pending'),(7,'Renovation of a community hall focusing on lighting and seating arrangements for better events.','245 Maple Avenue, Toronto, ON','M4C 1J9','416-567-8901','hall_renovation@community.ca','2024-11-19 18:37:15',1,'2024-11-19 18:37:15','Pending'),(8,'Construction of a residential complex with multiple buildings, underground parking, and green spaces for community use.','987 Greenfield Crescent, Mississauga, ON','L5A 4C7','905-345-7890','residential_project@build.ca','2024-11-19 18:37:29',1,'2024-11-19 18:37:29','Pending'),(9,'Revamping of a heritage site, including structural repairs and setting up a visitor\'s center.','102 Heritage Lane, Kingston, ON','K7L 3N6','613-765-4321','heritage_update@historica.ca','2024-11-19 18:37:41',1,'2024-11-19 18:37:41','Pending'),(10,'Upgrade of electrical wiring and installation of energy-efficient lighting in a public school.','310 School Street, Hamilton, ON','L8N 1A1','905-789-1234','school_upgrade@edu.ca','2024-11-19 18:37:51',1,'2024-11-19 18:37:51','Pending'),(11,'Development of a multi-functional community center, including sports facilities, conference rooms, and a recreational park.','789 Community Drive, Ottawa, ON','K1A 0B1','613-456-7890','community_center@cityprojects.ca','2024-11-19 18:40:00',1,'2024-11-19 18:40:00','Pending');
+INSERT INTO `projects` VALUES (1,'Development of a new residential building','123 Queen St, Toronto','L4R 7T6','123-456-7890','daniel@example.com','2024-11-19 17:17:33',1,'2024-11-19 17:17:33','Pending'),(2,'Development of a recreational park with a children’s play area and a walking track.','753 Cherry Ave, City 10','P8Q 9R1','519-890-1234','user10@example.com','2024-11-19 18:14:47',9,'2024-11-19 18:14:47','Pending'),(3,'Renovation of a residential house to include new flooring and updated lighting fixtures.','123 Maple St, City 3','B2C 3D4','613-123-4567','user3@example.com','2024-11-19 18:17:54',2,'2024-11-19 18:17:54','Pending'),(4,'High-Rise Building Construction','102 Sky Avenue, Downtown','A1B 2C3','123-456-7890','manager@highrisebuilders.com','2024-11-19 18:21:37',1,'2024-11-19 18:21:37','Pending'),(5,'Renovation of Maple Community Centre, including interior redesign, electrical upgrades, and landscaping to enhance functionality and aesthetics.','75 Maplewood Avenue, Toronto, ON','M4Y 1A7','416-789-1234','admin@maplerenovations.ca','2024-11-19 18:27:31',1,'2024-11-19 18:27:31','Pending'),(6,'Development of the Oakwood Public Library, focusing on structural improvements, modern technology installations, and accessibility enhancements for better community use.','123 Oakwood Drive, Ottawa, ON','K1Y 4E4','613-456-7890','info@oakwoodlibrary.ca','2024-11-19 18:29:29',1,'2024-11-19 18:29:29','Pending'),(7,'Renovation of a community hall focusing on lighting and seating arrangements for better events.','245 Maple Avenue, Toronto, ON','M4C 1J9','416-567-8901','hall_renovation@community.ca','2024-11-19 18:37:15',1,'2024-11-19 18:37:15','Pending'),(8,'Construction of a residential complex with multiple buildings, underground parking, and green spaces for community use.','987 Greenfield Crescent, Mississauga, ON','L5A 4C7','905-345-7890','residential_project@build.ca','2024-11-19 18:37:29',1,'2024-11-19 18:37:29','Pending'),(9,'Revamping of a heritage site, including structural repairs and setting up a visitor\'s center.','102 Heritage Lane, Kingston, ON','K7L 3N6','613-765-4321','heritage_update@historica.ca','2024-11-19 18:37:41',1,'2024-11-19 18:37:41','Pending'),(10,'Upgrade of electrical wiring and installation of energy-efficient lighting in a public school.','310 School Street, Hamilton, ON','L8N 1A1','905-789-1234','school_upgrade@edu.ca','2024-11-19 18:37:51',1,'2024-11-19 18:37:51','Pending'),(11,'Development of a multi-functional community center, including sports facilities, conference rooms, and a recreational park.','789 Community Drive, Ottawa, ON','K1A 0B1','613-456-7890','community_center@cityprojects.ca','2024-11-19 18:40:00',1,'2024-11-19 18:40:00','Pending');
 /*!40000 ALTER TABLE `projects` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -168,6 +203,41 @@ LOCK TABLES `service_attachments` WRITE;
 UNLOCK TABLES;
 
 --
+-- Table structure for table `service_call_shifts`
+--
+
+DROP TABLE IF EXISTS `service_call_shifts`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `service_call_shifts` (
+  `Shift_ID` int NOT NULL AUTO_INCREMENT,
+  `Employee_Assigned` int DEFAULT NULL,
+  `Service_Call_ID` int DEFAULT NULL,
+  `Task_Assigned` int DEFAULT NULL,
+  `Time_Start` datetime DEFAULT NULL,
+  `Time_Finish` datetime DEFAULT NULL,
+  PRIMARY KEY (`Shift_ID`),
+  UNIQUE KEY `unique_shift_combination` (`Employee_Assigned`,`Service_Call_ID`,`Task_Assigned`,`Time_Start`,`Time_Finish`),
+  KEY `Employee_Assigned` (`Employee_Assigned`),
+  KEY `Service_Call_ID` (`Service_Call_ID`),
+  KEY `Task_Assigned` (`Task_Assigned`),
+  CONSTRAINT `service_call_shifts_ibfk_1` FOREIGN KEY (`Employee_Assigned`) REFERENCES `users` (`ID`),
+  CONSTRAINT `service_call_shifts_ibfk_2` FOREIGN KEY (`Service_Call_ID`) REFERENCES `service_calls` (`SERVICE_CALL_ID`),
+  CONSTRAINT `service_call_shifts_ibfk_3` FOREIGN KEY (`Task_Assigned`) REFERENCES `tasklist` (`TASK_ID`)
+) ENGINE=InnoDB AUTO_INCREMENT=24 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `service_call_shifts`
+--
+
+LOCK TABLES `service_call_shifts` WRITE;
+/*!40000 ALTER TABLE `service_call_shifts` DISABLE KEYS */;
+INSERT INTO `service_call_shifts` VALUES (1,1,3,4,'2024-11-15 09:00:00','2024-11-15 12:00:00'),(2,1,3,7,'2024-11-15 13:00:00','2024-11-15 15:00:00'),(3,1,3,7,'2024-11-15 16:00:00','2024-11-15 17:00:00'),(4,2,9,11,'2024-11-20 13:30:00','2024-11-20 17:00:00'),(5,3,5,7,'2024-11-21 09:00:00','2024-11-21 15:00:00'),(6,3,5,9,'2024-11-21 09:00:00','2024-11-21 12:30:00'),(7,4,8,4,'2024-11-22 10:00:00','2024-11-22 14:30:00'),(8,4,8,11,'2024-11-22 10:30:00','2024-11-22 15:00:00'),(9,5,5,7,'2024-11-24 09:00:00','2024-11-24 13:30:00'),(10,5,5,10,'2024-11-24 10:00:00','2024-11-24 14:00:00'),(11,6,8,4,'2024-11-25 08:00:00','2024-11-25 12:00:00'),(12,6,8,9,'2024-11-25 13:00:00','2024-11-25 17:00:00'),(13,7,3,5,'2024-11-26 09:00:00','2024-11-26 15:00:00'),(14,7,3,8,'2024-11-26 10:00:00','2024-11-26 16:00:00'),(16,8,6,3,'2024-11-27 07:30:00','2024-11-27 12:30:00'),(15,8,6,10,'2024-11-27 13:00:00','2024-11-27 17:00:00'),(17,9,7,6,'2024-11-28 09:00:00','2024-11-28 12:00:00'),(18,9,7,11,'2024-11-28 13:00:00','2024-11-28 17:00:00'),(19,10,4,2,'2024-11-29 08:00:00','2024-11-29 12:00:00'),(20,10,4,7,'2024-11-29 13:00:00','2024-11-29 16:00:00'),(21,11,2,8,'2024-12-01 07:00:00','2024-12-01 12:00:00'),(22,11,2,10,'2024-12-01 13:00:00','2024-12-01 14:00:00'),(23,11,2,10,'2024-12-01 15:00:00','2024-12-01 17:00:00');
+/*!40000 ALTER TABLE `service_call_shifts` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `service_calls`
 --
 
@@ -189,7 +259,7 @@ CREATE TABLE `service_calls` (
   PRIMARY KEY (`SERVICE_CALL_ID`),
   KEY `Created_By` (`Created_By`),
   CONSTRAINT `service_calls_ibfk_1` FOREIGN KEY (`Created_By`) REFERENCES `users` (`ID`)
-) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -252,7 +322,7 @@ CREATE TABLE `service_task_assignments` (
   CONSTRAINT `service_task_assignments_ibfk_1` FOREIGN KEY (`Service_Call_ID`) REFERENCES `service_calls` (`SERVICE_CALL_ID`),
   CONSTRAINT `service_task_assignments_ibfk_2` FOREIGN KEY (`Task_ID`) REFERENCES `tasklist` (`TASK_ID`),
   CONSTRAINT `service_task_assignments_ibfk_3` FOREIGN KEY (`Employee_Assigned`) REFERENCES `users` (`ID`)
-) ENGINE=InnoDB AUTO_INCREMENT=23 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=25 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1101,6 +1171,28 @@ DELIMITER ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `DeleteProjectAssignment` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'NO_AUTO_VALUE_ON_ZERO' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `DeleteProjectAssignment`(
+    IN _Assignment_ID INT
+)
+BEGIN
+    DELETE FROM task_assignments 
+    WHERE ASSIGNMENT_ID = _Assignment_ID;
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 /*!50003 DROP PROCEDURE IF EXISTS `DeleteProjectSubtask` */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
@@ -1136,6 +1228,30 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `DeleteProjectTask`(
 BEGIN
     DELETE FROM PROJECT_TASKLIST 
     WHERE PROJECT_TASK_ID = _PROJECT_TASK_ID;
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `DeleteProjectTaskPT` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'NO_AUTO_VALUE_ON_ZERO' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `DeleteProjectTaskPT`(
+    IN _PROJECT_ID INT,
+    IN _TASK_ID INT
+)
+BEGIN
+    DELETE FROM PROJECT_TASKLIST 
+    WHERE PROJECT_ID = _PROJECT_ID 
+    AND TASK_ID = _TASK_ID;
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -1199,6 +1315,28 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `DeleteServiceCallTask`(
 BEGIN
     DELETE FROM SERVICE_TASK_ASSIGNMENTS
     WHERE SERVICE_TASK_ID = _SERVICE_CALL_TASK_ID;
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `DeleteSubtaskProjectAssignment` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'NO_AUTO_VALUE_ON_ZERO' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `DeleteSubtaskProjectAssignment`(
+    IN _PROJECT_SUBTASK_ID INT
+)
+BEGIN
+    DELETE FROM project_subtasklist 
+    WHERE PROJECT_SUBTASK_ID = _PROJECT_SUBTASK_ID;
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -1308,13 +1446,13 @@ DELIMITER ;
 /*!50003 SET character_set_results = utf8mb4 */ ;
 /*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+/*!50003 SET sql_mode              = 'NO_AUTO_VALUE_ON_ZERO' */ ;
 DELIMITER ;;
 CREATE DEFINER=`root`@`localhost` PROCEDURE `GetAssignedTasksByProject`(
     IN projectId INT
 )
 BEGIN
-    SELECT TASK_ASSIGNMENTS.Employee_Assigned, TASK_ASSIGNMENTS.Task_Assigned, task_assignments.Time_Start , task_assignments.Time_Finish FROM TASK_ASSIGNMENTS 
+    SELECT TASK_ASSIGNMENTS.ASSIGNMENT_ID,TASK_ASSIGNMENTS.Employee_Assigned, TASK_ASSIGNMENTS.Task_Assigned, task_assignments.Time_Start , task_assignments.Time_Finish FROM TASK_ASSIGNMENTS 
     WHERE Project_ID = projectId
     ;
 END ;;
@@ -1390,19 +1528,108 @@ DELIMITER ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `GetEmployeeProjectHours` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'NO_AUTO_VALUE_ON_ZERO' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `GetEmployeeProjectHours`(
+    IN _Project_IDs VARCHAR(255),
+	IN _Start_Time DATETIME, 
+    IN _End_Time DATETIME
+)
+BEGIN
+    SELECT
+		u.ID,
+        u.first_name, 
+        u.last_name, 
+        SUM(TIMESTAMPDIFF(HOUR, ps.Time_Start, ps.Time_Finish)) AS Total_Hours_Worked, 
+        MIN(ps.Time_Start) AS Earliest_Shift_Start,
+        p.status 
+    FROM 
+        project_shifts ps
+    JOIN 
+        users u ON u.ID = ps.Employee_Assigned
+    JOIN 
+        projects p ON p.PROJECT_ID = ps.Project_ID
+    WHERE
+		(_Project_IDs IS NULL OR FIND_IN_SET(ps.Project_ID, _Project_IDs))  -- Matching project IDs
+    GROUP BY 
+        u.first_name, u.last_name, p.status
+	HAVING 
+    (_Start_Time IS NULL OR Earliest_Shift_Start >= _Start_Time) AND 
+    (_End_Time IS NULL OR Earliest_Shift_Start <= _End_Time)
+    ORDER BY 
+    Earliest_Shift_Start DESC;
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `GetEmployeeServiceCallHours` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'NO_AUTO_VALUE_ON_ZERO' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `GetEmployeeServiceCallHours`(
+    IN _Service_Call_IDs VARCHAR(255),
+	IN _Start_Time DATETIME, 
+    IN _End_Time DATETIME
+)
+BEGIN
+    SELECT 
+		u.ID,
+        u.first_name, 
+        u.last_name, 
+        SUM(TIMESTAMPDIFF(HOUR, ss.Time_Start, ss.Time_Finish)) AS Total_Hours_Worked, 
+        MIN(ss.Time_Start) AS Earliest_Shift_Start,
+        s.status 
+    FROM 
+        service_call_shifts ss
+    JOIN 
+        users u ON u.ID = ss.Employee_Assigned
+    JOIN 
+        service_calls s ON s.SERVICE_CALL_ID = ss.Service_Call_ID
+    WHERE
+		(_Service_Call_IDs IS NULL OR FIND_IN_SET(ss.Service_Call_ID, _Service_Call_IDs))
+    GROUP BY 
+        u.first_name, u.last_name, s.status
+	HAVING 
+    (_Start_Time IS NULL OR Earliest_Shift_Start >= _Start_Time) AND 
+    (_End_Time IS NULL OR Earliest_Shift_Start <= _End_Time)
+    ORDER BY 
+        Earliest_Shift_Start DESC;
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 /*!50003 DROP PROCEDURE IF EXISTS `GetEmployeesForService` */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
 /*!50003 SET @saved_col_connection = @@collation_connection */ ;
-/*!50003 SET character_set_client  = utf8mb3 */ ;
-/*!50003 SET character_set_results = utf8mb3 */ ;
-/*!50003 SET collation_connection  = utf8mb3_general_ci */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'NO_AUTO_VALUE_ON_ZERO' */ ;
 DELIMITER ;;
 CREATE DEFINER=`root`@`localhost` PROCEDURE `GetEmployeesForService`(IN service_id INT)
 BEGIN
     SELECT 
+		sta.SERVICE_TASK_ID,
         sta.Employee_Assigned,
         sta.Time_Start,
         sta.Time_Finish,
@@ -1529,11 +1756,11 @@ DELIMITER ;
 /*!50003 SET character_set_results = utf8mb4 */ ;
 /*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+/*!50003 SET sql_mode              = 'NO_AUTO_VALUE_ON_ZERO' */ ;
 DELIMITER ;;
 CREATE DEFINER=`root`@`localhost` PROCEDURE `GetProjectSubtasksByProjectID`(IN ProjectID INT)
 BEGIN
-	SELECT project_subtasklist.Project_ID , project_subtasklist.Subtask_ID FROM Project_Subtasklist 
+	SELECT project_subtasklist.project_subtask_id,project_subtasklist.Project_ID , project_subtasklist.Subtask_ID FROM Project_Subtasklist 
     WHERE Project_ID = ProjectID;
 END ;;
 DELIMITER ;
@@ -1549,16 +1776,56 @@ DELIMITER ;
 /*!50003 SET character_set_results = utf8mb4 */ ;
 /*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+/*!50003 SET sql_mode              = 'NO_AUTO_VALUE_ON_ZERO' */ ;
 DELIMITER ;;
 CREATE DEFINER=`root`@`localhost` PROCEDURE `GetProjectTasksByID`(
     IN _Project_ID INT
 )
 BEGIN
-    SELECT PROJECT_TASKLIST.Project_ID, PROJECT_TASKLIST.Task_ID, tasklist.Task_ID FROM PROJECT_TASKLIST 
+    SELECT PROJECT_TASKLIST.project_task_id,PROJECT_TASKLIST.Project_ID, PROJECT_TASKLIST.Task_ID FROM PROJECT_TASKLIST 
     INNER JOIN tasklist ON PROJECT_TASKLIST.Task_ID = tasklist.Task_ID
     WHERE Project_ID = _Project_ID;
     
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `GetProjectTimetableEmployee` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'NO_AUTO_VALUE_ON_ZERO' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `GetProjectTimetableEmployee`(
+    IN _Employee_Assigned VARCHAR(255), 
+    IN _Start_Time DATETIME, 
+    IN _End_Time DATETIME
+)
+BEGIN
+SELECT 
+    p.Project_ID,
+    p.Address,
+    p.status,
+    SUM(TIMESTAMPDIFF(HOUR, ps.time_start, ps.time_finish)) AS total_hours,
+    MIN(ps.time_start) AS Earliest_Shift_Start
+FROM 
+    project_shifts ps JOIN
+    projects p ON p.Project_ID = ps.Project_ID
+WHERE  
+    (_Employee_Assigned IS NULL OR FIND_IN_SET(ps.Employee_Assigned, _Employee_Assigned)) 
+GROUP BY 
+    p.Project_ID, p.Address, p.Status
+HAVING 
+    (_Start_Time IS NULL OR Earliest_Shift_Start >= _Start_Time) AND 
+    (_End_Time IS NULL OR Earliest_Shift_Start <= _End_Time)
+ORDER BY 
+    Earliest_Shift_Start DESC;
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -1604,6 +1871,49 @@ BEGIN
     INNER JOIN tasklist ON service_task_assignments.Task_ID = tasklist.Task_ID
     WHERE Service_Call_ID = _Service_ID
     ;
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `GetServiceTimetableEmployee` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'NO_AUTO_VALUE_ON_ZERO' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `GetServiceTimetableEmployee`(
+    IN _Employee_Assigned VARCHAR(255), 
+    IN _Start_Time DATETIME, 
+    IN _End_Time DATETIME
+)
+BEGIN
+SELECT 
+    ss.Service_Call_ID,
+    s.Address,
+    s.Status,
+    SUM(TIMESTAMPDIFF(HOUR, ss.time_start, ss.time_finish)) AS total_hours,
+    MIN(ss.time_start) AS Earliest_Shift_Start
+FROM 
+    caliber.service_call_shifts ss
+    JOIN caliber.service_calls s ON s.Service_call_id = ss.Service_Call_ID
+WHERE  
+    (_Employee_Assigned IS NULL OR FIND_IN_SET(ss.Employee_Assigned, _Employee_Assigned)) AND 
+    (NULL IS NULL OR s.Address LIKE CONCAT('%', NULL, '%')) 
+
+GROUP BY 
+    ss.Service_call_id, s.Address, s.Status
+HAVING 
+
+    (_Start_Time IS NULL OR Earliest_Shift_Start >= _Start_Time) AND 
+    (_End_Time IS NULL OR Earliest_Shift_Start <= _End_Time) 
+ORDER BY 
+    Earliest_Shift_Start DESC;
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -1883,6 +2193,30 @@ DELIMITER ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `UpdateTaskIdForServiceCall` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'NO_AUTO_VALUE_ON_ZERO' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `UpdateTaskIdForServiceCall`(
+    IN target_service_call_id INT,
+    IN new_task_id INT
+)
+BEGIN
+    UPDATE service_task_assignments
+    SET Task_ID = new_task_id
+    WHERE Service_Call_ID = target_service_call_id;
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
@@ -1893,4 +2227,4 @@ DELIMITER ;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2024-11-20 22:41:13
+-- Dump completed on 2024-12-04 19:03:40

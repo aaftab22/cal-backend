@@ -3,7 +3,7 @@ const sequelize = require('../config/database');
 const { createAttachment } = require('../controllers/attachmentController');
 
 const attachmentService = {
-    createAttachment: async (attachmentData) => {
+    createAttachment: async (attachmentData,transaction) => {
         return sequelize.query('CALL CreateAttachment(:projectID, :attachmentName, :attachmentType, :fileFormat, :filePath)', {
             replacements: {
                 projectID: attachmentData.Project_ID,
@@ -12,7 +12,8 @@ const attachmentService = {
                 fileFormat: attachmentData.File_Format,
                 filePath: attachmentData.File_Path
             },
-            type: sequelize.QueryTypes.RAW
+            type: sequelize.QueryTypes.RAW,
+            transaction
         });
     },
 

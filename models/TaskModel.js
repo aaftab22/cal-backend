@@ -10,10 +10,10 @@ const Task = sequelize.define('Task', {
     Task_Name: {
         type: DataTypes.STRING(64),
         allowNull: false,
-        unique: true  
+        unique: true  // Ensure Task_Name is unique
     }
 }, {
-    tableName: 'tasklist',
+    tableName: 'TASKLIST',
     timestamps: false
 });
 

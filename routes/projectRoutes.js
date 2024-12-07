@@ -6,7 +6,7 @@ const upload = require('../middlewares/multerConfig');
 
 // Routes for project operations
 router.post('/create', upload.array('projectAttachments', 20), projectController.createProject);
-router.put('/:id', projectController.updateProject);
+router.put('/:id',upload.array('projectAttachments', 20), projectController.updateProject);
 router.get('/', projectController.getProjects);
 router.get('/:id', projectController.getProjectById);
 router.delete('/:id', projectController.deleteProject);

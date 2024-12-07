@@ -31,7 +31,7 @@ const Project = sequelize.define('Project', {
         }
     }
 }, {
-    tableName: 'projects',
+    tableName: 'PROJECTS',
     timestamps: true,
     createdAt: 'Created_At',
     updatedAt: 'Updated_At'

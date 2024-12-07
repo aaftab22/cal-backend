@@ -28,7 +28,7 @@ const serviceCallService = {
 
     updateServiceCall: async (servicecallId, serviceCallData) => { 
         return sequelize.query (
-            'CALL UpdateServiceCall(:id, :description, :address, :postCode, :contactPhone, :contactEmail, :sitestatus, :timestart, :timefinish, :status)', { 
+            'CALL UpdateServiceCall(:id, :description, :address, :postCode, :contactPhone, :contactEmail, :sitestatus, :status)', { 
                 replacements: { 
                     id: servicecallId,
                     description: serviceCallData.Service_Call_Description,
@@ -80,7 +80,6 @@ const serviceCallService = {
             type: sequelize.QueryTypes.RAW,
         });
     },
-
     getEmployeesByServiceCall: async (Service_Call_ID) => { 
         return sequelize.query('CALL GetEmployeesForService(:id)',{ 
             replacements: { id: Service_Call_ID },
@@ -95,13 +94,18 @@ const serviceCallService = {
         });
     },
 
-    createServiceCallTask: async (taskData,empData) => { 
+    
+    createServiceCallTask: async (ServiceCallId,taskId,empData) => { 
+
+        if(empData.Employee_Assigned){
+            empData.Employee_ID = empData.Employee_Assigned
+        }
         return sequelize.query(
             'CALL CreateServiceCallTaskAssignment(:Service_Call_ID, :Task_ID, :Employee_Assigned, :Time_Start, :Time_Finish)', { 
                 replacements: { 
-                    Service_Call_ID: taskData.Service_Call_ID, 
-                    Task_ID: taskData.Task_ID,
-                    Employee_Assigned: empData.Employee_Assigned,
+                    Service_Call_ID: ServiceCallId, 
+                    Task_ID: taskId,
+                    Employee_Assigned: empData.Employee_ID,
                     Time_Start: empData.Time_Start,
                     Time_Finish: empData.Time_Finish
                 },
@@ -111,7 +115,7 @@ const serviceCallService = {
     },
 
     getServiceTaskById: async (Task_Id) => {
-        console.log(Task_Id)
+        // console.log(Task_Id)
         return sequelize.query('CALL GetServiceTasksByID(:taskId)', {
             replacements: {taskId: Task_Id },
             type: sequelize.QueryTypes.SELECT,
@@ -133,6 +137,20 @@ const serviceCallService = {
             type: sequelize.QueryTypes.RAW
         });
     },
+    UpdateTaskIdForServiceCall:async(serviceCallId,newTaskId)=>{
+        return sequelize.query(
+            'CALL UpdateTaskIdForServiceCall(:target_service_call_id,:new_task_id)',
+            { 
+                replacements: { 
+                    target_service_call_id: serviceCallId, 
+                    new_task_id: newTaskId,
+
+                },
+                type: sequelize.QueryTypes.RAW
+            }
+        );
+    },
+
     getFilteredServiceCalls: async (params) => {
         const { employeeAssigned, tasks, address, siteStatus,timeStart,timeFinish } = params;
     
@@ -149,7 +167,7 @@ const serviceCallService = {
             formattedEnd = date.toISOString().slice(0, 19).replace("T", " ");
         }
         const employeeString = employeeAssigned ? employeeAssigned.join(',') : null;
-        console.log("Employee"+employeeString)
+        // console.log("Employee"+employeeString)
         const tasksString = tasks ? tasks.join(',') : null;
 
         return sequelize.query(

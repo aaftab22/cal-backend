@@ -1,7 +1,7 @@
 const sequelize = require('../config/database');
 
 const projectService = {
-    createProject: async (projectData) => { 
+    createProject: async (projectData,transaction=false) => { 
         const result = await sequelize.query(
             'CALL CreateProject(:Project_Description, :Address, :Post_Code, :Contact_Phone, :Contact_Email, :Created_By, :Status)', 
             {
@@ -15,6 +15,7 @@ const projectService = {
                     Status: projectData.Status || 'Pending'
                 },
                 type: sequelize.QueryTypes.RAW,
+                transaction
             }
         );
 
@@ -23,7 +24,7 @@ const projectService = {
     },
 
 
-    updateProject: async (projectId, projectData) => {
+    updateProject: async (projectId, projectData,transaction=false) => {
         return sequelize.query(
             'CALL UpdateProject(:id, :description, :address, :postCode, :contactPhone, :contactEmail, :status)', 
             {
@@ -37,6 +38,7 @@ const projectService = {
                     status: projectData.Status || 'Pending' // Default to 'Pending'
                 },
                 type: sequelize.QueryTypes.RAW,
+                transaction
             }
         );
     },
@@ -47,86 +49,101 @@ const projectService = {
         });
     },
 
-    getProjectById: async (projectId) => {
+    getProjectById: async (projectId,transaction=false) => {
         return sequelize.query('CALL GetProjectById(:id)', {
             replacements: { id: projectId },
             type: sequelize.QueryTypes.SELECT,
+            transaction
         });
     },
 
-    deleteProject: async (projectId) => {
+    deleteProject: async (projectId,transaction=false) => {
         return sequelize.query('CALL DeleteProject(:id)', {
             replacements: { id: projectId },
             type: sequelize.QueryTypes.RAW,
+            transaction
         });
     },
 
-    createProjectSubtask: async (subtaskData) => { 
+    createProjectSubtask: async (subtaskData,transaction=null) => { 
         return sequelize.query('CALL CreateProjectSubtask(:Project_ID, :Subtask_ID)', { 
             replacements: {
                 Project_ID: subtaskData.Project_ID,
-                Subtask_ID: subtaskData.Subtask_ID
+                Subtask_ID: subtaskData.Subtask_ID,
             },
-            type: sequelize.QueryTypes.RAW
+            type: sequelize.QueryTypes.RAW,
+            transaction
         });
     },
     
-    getSubtasksByProject: async (Project_ID) => { 
+    getSubtasksByProject: async (Project_ID,transaction=false) => { 
         return sequelize.query('CALL GetProjectSubtasksByProjectID(:id)',{ 
             replacements: { id: Project_ID },
             type: sequelize.QueryTypes.RAW,
+            transaction
         });
     },
 
-    deleteSubtask: async (subtaskId) => { 
+    deleteSubtask: async (subtaskId,transaction=false) => { 
         return sequelize.query('CALL DeleteProjectSubtask(:id)',{
             replacements: { id: subtaskId },
             type: sequelize.QueryTypes.RAW,
+            transaction
         });
     },
 
-    AssignTask: async (taskData) => { 
+    AssignTask: async (taskData,transaction=false) => { 
         return sequelize.query('CALL AssignTask(:Employee_ID, :Project_ID, :Task_Assigned, :Time_Start, :Time_Finish)',{ 
             replacements: { 
                 Employee_ID: taskData.Employee_ID,
                 Project_ID: taskData.Project_ID,
                 Task_Assigned: taskData.Task_Assigned, 
                 Time_Start: taskData.Time_Start,
-                Time_Finish: taskData.Time_Finish
+                Time_Finish: taskData.Time_Finish,
             },
             type: sequelize.QueryTypes.RAW,
+            transaction
         });
     },
 
-    GetUserBySpecialty: async (taskData) => { 
+    GetUserBySpecialty: async (taskData,transaction=false) => { 
         return sequelize.query('CALL GetUserBySpecialty(:Specialty)',{
             replacements: { 
                 Specialty: taskData.TASK_ID,
-            }
+            },
+            transaction
         })
     },
 
-    createProjectTask: async (taskData) => {
-        return sequelize.query(
-            'CALL CreateProjectTask(:Project_ID, :Task_ID)', 
-            {
-                replacements: { 
-                    Project_ID: taskData.Project_ID,
-                    Task_ID: taskData.Task_ID
-                 },
-                type: sequelize.QueryTypes.RAW,
-            }
-        );
+    createProjectTask: async (taskData,transaction=false) => {
+        try {
+            // console.log(taskData.Project_ID, taskData.Task_ID);
+            await sequelize.query(
+                'CALL CreateProjectTask(:Project_ID, :Task_ID)', 
+                {
+                    replacements: { 
+                        Project_ID: taskData.Project_ID,
+                        Task_ID: taskData.Task_ID,
+                        transaction
+                     },
+                    type: sequelize.QueryTypes.RAW,
+                    transaction
+                }
+            );
+        } catch (error) {
+            console.error("Error creating project task:", error);
+        }
     },
 
-    getProjectTaskById: async (taskId) => {
+    getProjectTaskById: async (taskId,transaction=false) => {
         return sequelize.query('CALL GetProjectTasksByID(:taskId)', {
             replacements: { taskId },
             type: sequelize.QueryTypes.SELECT,
+            transaction
         });
     },
 
-    updateProjectTask: async (taskId, taskData) => {
+    updateProjectTask: async (taskId, taskData,transaction=false) => {
         return sequelize.query(
             'CALL UpdateTask(:taskId, :taskName)', 
             {
@@ -135,27 +152,52 @@ const projectService = {
                     taskName: taskData.Task_Name,
                 },
                 type: sequelize.QueryTypes.RAW,
+                transaction
             }
         );
     },
 
-    deleteProjectTask: async (taskId) => {
+    deleteProjectTask: async (taskId,transaction=false) => {
         return sequelize.query('CALL DeleteProjectTask(:taskId)', {
             replacements: { taskId },
             type: sequelize.QueryTypes.RAW,
+            transaction
+        });
+    },
+    deleteProjectTaskPT: async (projectId,taskId,transaction=false) => {
+        return sequelize.query('CALL DeleteProjectTaskPT(:projectId,:taskId)', {
+            replacements: { projectId,taskId },
+            type: sequelize.QueryTypes.RAW,
+            transaction
+        });
+    },
+    deleteProjectSubTask: async (project_subtask_id,transaction=false) => {
+        return sequelize.query('CALL DeleteSubtaskProjectAssignment(:project_subtask_id)', {
+            replacements: { project_subtask_id },
+            type: sequelize.QueryTypes.RAW,
+            transaction
+        });
+    },    
+    deleteProjectAssignment: async (assignment_id,transaction=false) => {
+        return sequelize.query('CALL DeleteProjectAssignment(:assignment_id)', {
+            replacements: { assignment_id },
+            type: sequelize.QueryTypes.RAW,
+            transaction
         });
     },
 
-    getAssignedTasksByProject: async (project_ID) => { 
+    getAssignedTasksByProject: async (project_ID,transaction=false) => { 
         return sequelize.query('CALL GetAssignedTasksByProject(:project_ID)', { 
             replacements: { project_ID },
-            type: sequelize.QueryTypes.RAW
+            type: sequelize.QueryTypes.RAW,
+            transaction
         });
     },
 
-    getTimeFrameByProject: async (project_ID) => { 
+    getTimeFrameByProject: async (project_ID,transaction=false) => { 
         return sequelize.query('CALL GetTimeFrameByProject(:project_ID)', { 
             replacements: { project_ID },
+            transaction
         });
     },
     

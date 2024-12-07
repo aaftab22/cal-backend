@@ -12,7 +12,7 @@ const dbController = {
             const result = []
             const tasks = await taskService.getTasks();
             const resulttasks = Object.values(tasks[0])
-            console.log(resulttasks)
+            // console.log(resulttasks)
             for (const task of resulttasks) { 
                 const taskData = task
                 let ObjStructure = 
@@ -26,30 +26,30 @@ const dbController = {
                 const subtasks = await subtaskService.GetSubtaskByTask(taskData);
                 if (subtasks[0] !== undefined) {
                     tempsubtasks = Object.values(subtasks[0]);
-                    console.log(tempsubtasks);
+                    // console.log(tempsubtasks);
                     ObjStructure.Subtasks = tempsubtasks
                 };
 
                 const employees = await projectService.GetUserBySpecialty(taskData);
                 if (employees[0] !== undefined){
                     tempemployees = Object.values(employees);
-                    console.log(tempemployees)
+                    // console.log(tempemployees)
                     for (let i = 0; i < tempemployees.length; i++) { 
                         currtempemployee = tempemployees[i]
-                        console.log(currtempemployee)
+                        // console.log(currtempemployee)
                         let employee = await authService.getUserByID(currtempemployee.User_ID)
-                        console.log(employee)
+                        // console.log(employee)
                         tempemployees[i].Employee_Name = `${employee[0].First_Name} ${employee[0].Last_Name}`
                     }
 
-                    console.log(tempemployees)
+                    // console.log(tempemployees)
                     ObjStructure.Employees = tempemployees
                 };
 
                 result.push(ObjStructure);
             }
             res.status(200).json(result);
-            console.log(result)
+            // console.log(result)
         }catch (error) {
             console.error('SignUp Error:', error); // Log the error for debugging
             res.status(400).json({ error: error.message });

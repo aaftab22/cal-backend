@@ -39,7 +39,7 @@ const serviceController = {
             Time_Start: employee.timeStart,
             Time_Finish: employee.timeFinish,
           };
-          return serviceCallService.createServiceCallTask(taskData, empData);
+          return serviceCallService.createServiceCallTask(id["insertedId"],taskData.Task_ID, empData);
         })
       );
 
@@ -85,7 +85,6 @@ const serviceController = {
         console.log("No attachments uploaded.");
       }
 
-      // Respond with success
       res.status(201).json({
         message: "Service call created successfully",
         serviceCallId: id["insertedId"],
@@ -101,46 +100,70 @@ const serviceController = {
   updateServiceCall: async (req, res) => {
     try {
       const SERVICE_CALL_ID = req.params.id;
-      const serviceCallDetails = req.body.serviceData;
-
-      // Update service details
+      const serviceData = req.body.serviceData
+        ? req.body.serviceData
+        : JSON.parse(req.body.serviceDataJson).serviceData;
       const serviceDetails = {};
-      serviceDetails.Service_Call_Description =
-        serviceCallDetails.serviceCallDescription;
-      serviceDetails.Address = serviceCallDetails.address;
-      serviceDetails.Post_Code = serviceCallDetails.postCode;
-      serviceDetails.Contact_Phone = serviceCallDetails.contactPhone;
-      serviceDetails.Contact_Email = serviceCallDetails.contactEmail;
-      serviceDetails.Created_By = serviceCallDetails.createdBy;
-      serviceDetails.Site_Status = serviceCallDetails.siteStatus;
-      serviceDetails.Status = serviceCallDetails.status;
+      serviceDetails.Service_Call_Description =serviceData.serviceCallDescription;
+      serviceDetails.Address = serviceData.address;
+      serviceDetails.Post_Code = serviceData.postCode;
+      serviceDetails.Contact_Phone = serviceData.contactPhone;
+      serviceDetails.Contact_Email = serviceData.contactEmail;
+      serviceDetails.Created_By = serviceData.createdBy;
+      serviceDetails.Site_Status = serviceData.siteStatus;
+      serviceDetails.Status = serviceData.status;
 
+      const service = await serviceCallService.getServiceTaskById(SERVICE_CALL_ID)
+      const serviceObj = (Object.values(service[0]))
       await serviceCallService.updateServiceCall(
         SERVICE_CALL_ID,
-        ServiceDetails
+        serviceDetails
       );
-
-      const task = serviceCallDetails.task;
-
-      for (let j = 0; j < (task.subtasks || []).length; j++) {
-        const Subtask_ID = tasklist.Subtasklist[j].Subtask_ID;
-
-        await serviceCallService.createServiceSubtask(
-          SERVICE_CALL_ID,
-          Subtask_ID
-        );
+      // Replaces the task if the task in update is different from the one in the db
+      if(serviceObj[0].Task_ID !== serviceData.task.taskId){
+        serviceCallService.UpdateTaskIdForServiceCall(SERVICE_CALL_ID,serviceData.task.taskId)
       }
 
-      for (let j = 0; j < (task.Employees || []).length; j++) {
-        const employee = task.Employees[j];
+
+      const subtasks = await serviceCallService.getSubtasksByServiceCall(SERVICE_CALL_ID);
+      const existingSubtaskIds = subtasks.map(item => item.Subtask_ID);
+      
+      // Filtering the new subtasks (that are on the request but not on db) and old ones (that are on db but not request) to know what to remove and what not
+      const newSubtasks = serviceData.task.subtasks
+      .filter(item2 => !existingSubtaskIds.includes(parseInt(item2.subtaskId)))
+      .map(item => parseInt(item.subtaskId));
+    
+      const removedSubtasks = subtasks
+        .filter(item => 
+          !serviceData.task.subtasks.some(newItem => newItem.subtaskId === item.Subtask_ID.toString())
+        )
+        .map(item => item.SERVICE_SUBTASK_ID); 
+
+
+      for(let i=0; i<removedSubtasks.length; i++){
+        await serviceCallService.deleteSubtask(removedSubtasks[i])
+      }
+      for(let i=0; i<newSubtasks.length; i++){
+        await serviceCallService.createServiceSubtask(SERVICE_CALL_ID,newSubtasks[i])
+      }
+
+      const employees = await serviceCallService.getEmployeesByServiceCall(SERVICE_CALL_ID)
+      
+      for(let i = 0;i<(employees || []).length;i++){
+        await serviceCallService.deleteServiceTask(employees[i].SERVICE_TASK_ID)
+      }
+      for (let j = 0; j < (serviceData.task.employeesAssigned || []).length; j++) {
+        const employee = serviceData.task.employeesAssigned[j];
         const tempEmployee = {
-          Employee_ID: employee.Employee_ID,
-          Time_Start: employee.Time_Start,
-          Time_Finish: employee.Time_Finish,
+          Employee_ID: employee.employeeId,
+          Time_Start: employee.timeStart,
+          Time_Finish: employee.timeFinish,
           SERVICE_CALL_ID: SERVICE_CALL_ID,
-          Task_Assigned: task.Task_ID,
+          Task_Assigned: serviceData.task.taskId,
         };
-        await serviceCallService.createServiceCallTask(tempEmployee);
+        console.log("a")
+        await serviceCallService.createServiceCallTask(SERVICE_CALL_ID,serviceData.task.taskId,tempEmployee);
+        console.log("b")
       }
 
       if (req.files && req.files.attachments) {
@@ -152,8 +175,6 @@ const serviceController = {
             File_Format: path.extname(file.originalname).slice(1),
             File_Path: file.path,
           };
-
-          // Save the new attachment to the database
           await attachmentService.createAttachment(attachmentData);
         }
       }

@@ -5,6 +5,7 @@ const jwt = require('jsonwebtoken');
 
 const authService = {
     signUp: async (userData) => {
+        // console.log(userData)
         const hashedPassword = await bcrypt.hash(userData.Password, 10);
         return sequelize.query('CALL CreateUser(:email, :password, :firstName, :lastName, :phoneNumber, :address, :birthDate, :jobTitle, :emergencyContactFirstName, :emergencyContactLastName, :emergencyContactPhoneNumber, :emergencyContactRelation, :pictureFileName, :pictureFilePath)', {
             replacements: {
@@ -54,6 +55,7 @@ const authService = {
             type: sequelize.QueryTypes.SELECT,
         });
     },
+
    
 };
 

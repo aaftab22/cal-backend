@@ -5,7 +5,7 @@ const serviceController = require('../controllers/serviceController');
 
 
 router.post('/', upload.array('serviceAttachments', 20), serviceController.createServiceCall);
-router.put('/:id', serviceController.updateServiceCall);
+router.put('/:id',upload.array('serviceAttachments', 20), serviceController.updateServiceCall);
 router.get('/', serviceController.getServiceCalls);
 router.get('/:id', serviceController.getServiceCallById);
 router.post('/filter',serviceController.getFilteredServiceCalls)

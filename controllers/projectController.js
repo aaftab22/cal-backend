@@ -6,13 +6,37 @@ const upload = require("../middlewares/multerConfig");
 const subtaskService = require("../services/subtaskService");
 const authService = require("../services/authService");
 const fs = require("fs");
-  
+const sequelize = require('../config/database');
+const dotenv = require('dotenv');
+
+dotenv.config();
+
+const { getSignedUrl } = require("@aws-sdk/s3-request-presigner");
+const {
+  S3Client,
+  GetObjectCommand,
+  PutObjectCommand,
+  DeleteObjectCommand,
+} = require("@aws-sdk/client-s3");
+
+const BucketName = "caliber-space";
+const expiryTime = 3600;
+
+
+const space = new S3Client({
+  endpoint: "https://tor1.digitaloceanspaces.com",
+  region: "ca-central-1",
+  credentials: {
+    accessKeyId: process.env.SPACES_ACCESS_KEY,
+    secretAccessKey: process.env.SPACES_ACCESS_SECRET_KEY,
+  },
+});
+
+
 const projectController = {
   //Projects Table Functions
   createProject: async (req, res) => {
     try {
-      console.log("req.body.projectData", req.body.projectData);
-
       const projectData = JSON.parse(req.body.projectData);
       //PROJECT DETAILS
       const projectDetails = {};
@@ -44,11 +68,11 @@ const projectController = {
         }
         //PROJECT EMPLOYEE
         for (let i = 0; i < currTask.Employees.length; i++) {
-          console.log(currTask.Employees[i].Employee_ID);
+          // console.log(currTask.Employees[i].Employee_ID);
           tempEmployee = currTask.Employees[i];
           tempEmployee.Project_ID = insertedId;
           tempEmployee.Task_Assigned = currTask.Task_ID;
-          console.log(tempEmployee);
+          // console.log(tempEmployee);
           await projectService.AssignTask(tempEmployee);
         }
       }
@@ -57,32 +81,34 @@ const projectController = {
       console.log("Uploaded Attachments:", attachments);
 
       if (attachments.length > 0) {
-        const projectFolder = path.join(
-          __dirname,
-          `../uploads/projects/${insertedId}`
-        );
-        fs.mkdirSync(projectFolder, { recursive: true });
-
         for (const file of attachments) {
-          const newFilePath = path.join(
-            projectFolder,
-            path.basename(file.path)
-          );
-          fs.renameSync(file.path, newFilePath);
-
-          const attachmentData = {
-            Project_ID: insertedId,
-            Attachment_Name: file.originalname,
-            Attachment_Type: req.body.Attachment_Type || "Document",
-            File_Format: path
-              .extname(file.originalname)
-              .substring(1)
-              .toUpperCase(),
-            File_Path: newFilePath,
-          };
-
-          console.log("Attachment Data:", attachmentData);
-          await attachmentService.createAttachment(attachmentData);
+          console.log(file)
+          try {
+            const s3Key = `projects/${insertedId}/${file.originalname}`;
+            const uploadParams = {
+              Bucket: BucketName,
+              Key: s3Key,
+              Body: fs.readFileSync(file.path), 
+              ContentType: file.mimetype,
+              ACL: "public-read", 
+            };
+            const uploadCommand = new PutObjectCommand(uploadParams);
+            const response = await space.send(uploadCommand);
+            // console.log("Upload successful:", response);
+            const attachmentData = {
+              Project_ID: insertedId,
+              Attachment_Name: file.originalname,
+              Attachment_Type: req.body.Attachment_Type || "Document",
+              File_Format: path.extname(file.originalname).substring(1).toUpperCase(),
+              File_Path: `https://${BucketName}.s3.amazonaws.com/${s3Key}`, 
+            };
+      
+            console.log("Attachment Data:", attachmentData);
+            await attachmentService.createAttachment(attachmentData);
+            fs.unlinkSync(file.path);
+          } catch (error) {
+            console.error("Error uploading file to S3:", error);
+          }
         }
       } else {
         console.log("No attachments uploaded.");
@@ -103,43 +129,62 @@ const projectController = {
   },
 
   updateProject: async (req, res) => {
+    const transaction = await sequelize.transaction();
     try {
       const projectId = req.params.id;
-      const projectData = req.body;
+      const projectData = JSON.parse(req.body.projectData);
 
-      // Update project details
       const projectDetails = {
-        Project_Description: projectData.projectData.Project_Description,
-        Address: projectData.projectData.Address,
-        Post_Code: projectData.projectData.Post_Code,
-        Contact_Phone: projectData.projectData.Contact_Phone,
-        Contact_Email: projectData.projectData.Contact_Email,
-        Created_By: projectData.projectData.Created_By,
+        Project_Description: projectData.Project_Description,
+        Address: projectData.Address,
+        Post_Code: projectData.Post_Code,
+        Contact_Phone: projectData.Contact_Phone,
+        Contact_Email: projectData.Contact_Email,
+        Created_By: projectData.Created_By,
       };
 
-      console.log("Updating project details:", projectDetails);
+      await projectService.updateProject(projectId, projectDetails,{ transaction });
 
-      await projectService.updateProject(projectId, projectDetails);
 
+      // First deleting the existing content
+      const project = await projectService.getProjectTaskById(projectId,{ transaction })
+      const projectJson = Object.values(project[0])
+      const existingProjectTasks = projectJson.map(item => item.project_task_id);
+      for (let i = 0; i<existingProjectTasks.length;i++){
+        projectService.deleteProjectTask(existingProjectTasks[i],{ transaction })
+      }
+      // Recreating it
       const Tasklist = projectData.Tasklist;
       for (let i = 0; i < Tasklist.length; i++) {
         const taskData = {
           Project_ID: projectId,
           Task_ID: Tasklist[i].Task_ID,
         };
-        console.log("Creating/updating task:", taskData);
-
-        await projectService.createProjectTask(taskData);
+        await projectService.createProjectTask(taskData,{ transaction });
 
         const currTask = Tasklist[i];
+
+
+        const projectsub = await projectService.getSubtasksByProject(projectId,{ transaction });
+        const existingProjectSubTasks = projectsub.map(item => item.project_subtask_id);
+        for (let i = 0; i<existingProjectSubTasks.length;i++){
+          projectService.deleteProjectSubTask(existingProjectSubTasks[i],{ transaction })
+        }
+
 
         for (let j = 0; j < (currTask.Subtasklist || []).length; j++) {
           const tempSubTask = {
             Project_ID: projectId,
             Subtask_ID: currTask.Subtasklist[j].Subtask_ID,
           };
-          console.log("Creating/updating subtask:", tempSubTask);
-          await projectService.createProjectSubtask(tempSubTask);
+          await projectService.createProjectSubtask(tempSubTask,{ transaction });
+        }
+
+        let assignedTasks = await projectService.getAssignedTasksByProject(projectId,{ transaction });
+        const assignmentIds = assignedTasks.map(item => item.ASSIGNMENT_ID);
+
+        for (let i = 0; i<assignmentIds.length;i++){
+          projectService.deleteProjectAssignment(assignmentIds[i],{ transaction })
         }
 
         for (let j = 0; j < (currTask.Employees || []).length; j++) {
@@ -151,8 +196,7 @@ const projectController = {
             Project_ID: projectId,
             Task_Assigned: currTask.Task_ID,
           };
-          console.log("Assigning task to employee:", tempEmployee);
-          await projectService.AssignTask(tempEmployee);
+          await projectService.AssignTask(tempEmployee,{ transaction });
         }
       }
 
@@ -165,15 +209,15 @@ const projectController = {
             File_Format: path.extname(file.originalname).slice(1),
             File_Path: file.path,
           };
-          console.log("Adding attachment:", attachmentData);
 
           // Save the new attachment to the database
-          await attachmentService.createAttachment(attachmentData);
+          await attachmentService.createAttachment(attachmentData,{ transaction });
         }
       }
-
+      await transaction.commit();
       res.status(200).json({ message: "Project updated successfully" });
     } catch (error) {
+      await transaction.rollback();
       console.error("Error updating project:", error);
       res.status(400).json({ error: error.message });
     }
@@ -191,7 +235,8 @@ const projectController = {
           projectData: {},
         };
         projectDetails.projectData.Project_ID = projectData[i].PROJECT_ID;
-        projectDetails.projectData.Project_Description = projectData[i].Project_Description;
+        projectDetails.projectData.Project_Description =
+          projectData[i].Project_Description;
         projectDetails.projectData.Address = projectData[i].Address;
         projectDetails.projectData.Post_Code = projectData[i].Post_Code;
         projectDetails.projectData.Contact_Phone = projectData[i].Contact_Phone;
@@ -252,7 +297,7 @@ const projectController = {
               taskStructure.Employees.push(assignedTasks[x]);
             }
           }
-          console.log(taskStructure);
+          // console.log(taskStructure);
           projectDetails.Tasks.push(taskStructure);
         }
 
@@ -289,7 +334,7 @@ const projectController = {
       const projectData = Object.values(project[0]);
       const currProjectID = projectData[0].PROJECT_ID;
       const result = {};
-      console.log(projectData[0]);
+      // console.log(projectData[0]);
       result.ProjectData = projectData[0];
       result.Tasks = [];
       const tasks = await projectService.getProjectTaskById(currProjectID);
@@ -346,12 +391,43 @@ const projectController = {
         }
 
         result.Tasks.push(taskStructure);
-        console.log(result);
+        // console.log(result);
       }
       timeframe = await projectService.getTimeFrameByProject(currProjectID);
       result.Timeframe = timeframe;
       const attachments = await attachmentService.getByProjectId(currProjectID);
-      result.Attachments = attachments;
+      if (attachments.length > 0) {
+        const signedAttachments = [];
+      
+        for (const attachment of attachments) {
+          try {
+            const fileKey = attachment.File_Path.split(`https://${BucketName}.s3.amazonaws.com/`)[1];
+      
+            if (!fileKey) {
+              console.error(`Invalid File_Path for attachment: ${attachment.File_Path}`);
+              continue;
+            }
+      
+            const getCommand = new GetObjectCommand({
+              Bucket: BucketName,
+              Key: fileKey,
+            });
+      
+            const signedUrl = await getSignedUrl(space, getCommand, { expiresIn: expiryTime });
+      
+            signedAttachments.push({
+              ...attachment,
+              SignedUrl: signedUrl,
+            });
+          } catch (error) {
+            console.error(`Error generating signed URL for attachment ${attachment.ATTACHMENT_ID}:`, error);
+          }
+        }
+      
+        result.Attachments = signedAttachments;
+      } else {
+        console.log("No attachments found for the project.");
+      }
 
       res.status(201).json(result);
     } catch (error) {
@@ -432,3 +508,131 @@ const projectController = {
 };
 
 module.exports = projectController;
+
+//PROJECT CREATION FORMAT
+//FOR ANYTHING REQUIRING PROJECT_ID TO INSERT, GET IT AFTER INSERTING PROJECT DESCRIPTION AND BEFORE INSERTING THE REST OF THE DATA
+// [{
+//     projectData: {
+//         Project_Description: "?",
+//         Address: "?",
+//         Post_Code: "?",
+//         Contact_Phone: "?",
+//         Contact_Email: "?",
+//         Created_By: "?",
+//     },
+//     Tasklist: [
+//         {
+//             Task_ID: "?",
+//             Task_Name: "?",
+//             Subtasklist: [
+//                 {
+//                     Subtask_ID: "?",
+//                     Project_ID: "?",
+//                 },
+//                 {
+//                     Subtask_ID: "?",
+//                     Project_ID: "?",
+//                 },
+//             ],
+//             Employees: [
+//                 {
+//                     Employee_ID: "?",
+//                     Time_Start: "?",
+//                     Time_Finish: "?"
+//                 },
+//                 {
+//                     Employee_ID: "?",
+//                     Time_Start: "?",
+//                     Time_Finish: "?"
+//                 },
+//             ],
+//         },
+//         {
+//             Task_ID: "?",
+//             Task_Name: "?",
+//             Subtasklist: [
+//                 {
+//                     Subtask_ID: "?",
+//                     Project_ID: "?",
+//                 },
+
+//             ],
+//             Employees: [
+//                 {
+//                     Employee_ID: "?",
+//                     Time_Start: "?",
+//                     Time_Finish: "?"
+//                 },
+//             ],
+//         },
+//     ],
+//     Project_Attachments: [
+//         {
+//             Attachment_Name: "?",
+//             File_Type: "?",
+//             File_Format: "?",
+//             File_Path: "?"
+//         },
+//         {
+//             Attachment_Name: "?",
+//             File_Type: "?",
+//             File_Format: "?",
+//             File_Path: "?"
+//         },
+
+//         ],
+//     },
+// ]
+
+//TEST DATA
+// {
+//     "projectData": {
+//         "Project_Description": "example new test",
+//         "Address": "test",
+//         "Post_Code": "test",
+//         "Contact_Phone": "test",
+//         "Contact_Email": "test",
+//         "Created_By": "1"
+//     },
+//     "Tasklist": [
+//         {
+//             "Task_ID": "1",
+//             "Subtasklist": [
+//                 {
+//                     "Subtask_ID": "1"
+//                 },
+//                 {
+//                     "Subtask_ID": "2"
+//                 }
+//             ],
+//             "Employees": [
+//                 {
+//                     "Employee_ID": "1",
+//                     "Time_Start": "1999-01-01",
+//                     "Time_Finish": "2000-01-01"
+//                 },
+//                 {
+//                     "Employee_ID": "2",
+//                     "Time_Start": "2000-01-01",
+//                     "Time_Finish": "2000-01-01"
+//                 }
+//             ]
+//         },
+//         {
+//             "Task_ID": "2",
+//             "Subtasklist": [
+//                 {
+//                     "Subtask_ID": "3"
+//                 }
+
+//             ],
+//             "Employees": [
+//                 {
+//                     "Employee_ID": "3",
+//                     "Time_Start": "2000-01-01",
+//                     "Time_Finish": "2002-01-01"
+//                 }
+//             ]
+//         }
+//     ]
+// }

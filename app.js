@@ -6,25 +6,17 @@ const subttaskRoutes = require('./routes/subtaskListRoutes');
 const taskRoutes = require('./routes/taskListRoutes');
 const dbRoutes = require('./routes/dbRoutes');
 const serviceRoutes = require('./routes/serviceRoutes')
+const timesheetRoutes = require('./routes/timesheetRoutes')
 const cors = require('cors');
+
+
 const dotenv = require('dotenv');
 
 dotenv.config();
 
 const app = express();
-
 app.use(bodyParser.json());
-
-const allowedOrigins = [
-    'https://cal-frontend-eight.vercel.app',
-  ];
-  app.use(
-    cors({
-      origin: allowedOrigins,
-      methods: ['GET', 'POST', 'PUT', 'DELETE'],
-      credentials: true,
-    })
-  );
+app.use(cors())
 
 app.use('/api/auth', authRoutes);
 app.use('/api/projects', projectRoutes);
@@ -32,7 +24,7 @@ app.use('/api/subtasklist', subttaskRoutes);
 app.use('/api/tasks', taskRoutes);
 app.use('/api/taskcategories', dbRoutes);
 app.use('/api/servicecalls', serviceRoutes);
-
+app.use('/api/timesheet',timesheetRoutes)
 
 const PORT = process.env.APP_PORT;
 app.listen(PORT, () => {
