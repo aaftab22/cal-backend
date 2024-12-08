@@ -27,7 +27,6 @@ const authService = {
             type: sequelize.QueryTypes.RAW
         });
     },
-
     login: async (email, password) => {
         const user = await User.findOne({ where: { Email: email } });
         if (!user) {
@@ -55,8 +54,40 @@ const authService = {
             type: sequelize.QueryTypes.SELECT,
         });
     },
+    
+    updateUser: async (Id,updatedUser) => {
+        try {
 
-   
+            let hashedPassword = null
+            if(updatedUser.password){
+                hashedPassword = await bcrypt.hash(updatedUser.password, 10);
+            }
+            console.log(hashedPassword)
+            return await sequelize.query(
+                'CALL UpdateEmployee(:ID,:email, :password, :firstName, :lastName, :phoneNumber, :address, :birthDate, :jobTitle, :emergencyContactFirstName, :emergencyContactLastName, :emergencyContactPhoneNumber, :emergencyContactRelation)',
+                {
+                    replacements: {
+                        ID:Id,
+                        email: updatedUser.email || null,
+                        password: hashedPassword || null,
+                        firstName: updatedUser.firstName || null,
+                        lastName: updatedUser.lastName || null,
+                        phoneNumber: updatedUser.phoneNumber || null,
+                        address: updatedUser.address || null,
+                        birthDate: updatedUser.birthDate || null,
+                        jobTitle: updatedUser.jobTitle || null,
+                        emergencyContactFirstName: updatedUser.emergencyContactFirstName || null,
+                        emergencyContactLastName: updatedUser.emergencyContactLastName || null,
+                        emergencyContactPhoneNumber: updatedUser.emergencyContactPhoneNumber || null,
+                        emergencyContactRelation: updatedUser.emergencyContactRelation || null
+                    },
+                    type: sequelize.QueryTypes.RAW
+                }
+            );
+        } catch (error) {
+            console.error('Error executing UpdateEmployee procedure:', error);
+            throw error;
+        }
+    }
 };
-
 module.exports = authService;

@@ -3,7 +3,7 @@
 -- Host: localhost    Database: caliber
 -- ------------------------------------------------------
 -- Server version	8.0.31
-use caliber;
+
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
 /*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
@@ -2064,6 +2064,53 @@ DELIMITER ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `UpdateEmployee` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `UpdateEmployee`(
+	IN ID int,
+    IN p_Email VARCHAR(64),
+    IN p_Password VARCHAR(64),
+    IN p_First_Name VARCHAR(24),
+    IN p_Last_Name VARCHAR(24),
+    IN p_Phone_Number VARCHAR(16),
+    IN p_Address VARCHAR(128),
+    IN p_Birth_Date DATE,
+    IN p_Job_Title ENUM('Admin', 'Employee'),
+    IN p_Emergency_Contact_First_Name VARCHAR(24),
+    IN p_Emergency_Contact_Last_Name VARCHAR(24),
+    IN p_Emergency_Contact_Phone_Number VARCHAR(16),
+    IN p_Emergency_Contact_Relation VARCHAR(24)
+)
+BEGIN
+    UPDATE caliber.users
+    SET
+        `Password` = COALESCE(p_Password, `Password`),
+        `First_Name` = COALESCE(p_First_Name, `First_Name`),
+        `Last_Name` = COALESCE(p_Last_Name, `Last_Name`),
+        `Phone_Number` = COALESCE(p_Phone_Number, `Phone_Number`),
+        `Address` = COALESCE(p_Address, `Address`),
+        `Birth_Date` = COALESCE(p_Birth_Date, `Birth_Date`),
+        `Job_Title` = COALESCE(p_Job_Title, `Job_Title`),
+        `Emergency_Contact_First_Name` = COALESCE(p_Emergency_Contact_First_Name, `Emergency_Contact_First_Name`),
+        `Emergency_Contact_Last_Name` = COALESCE(p_Emergency_Contact_Last_Name, `Emergency_Contact_Last_Name`),
+        `Emergency_Contact_Phone_Number` = COALESCE(p_Emergency_Contact_Phone_Number, `Emergency_Contact_Phone_Number`),
+        `Emergency_Contact_Relation` = COALESCE(p_Emergency_Contact_Relation, `Emergency_Contact_Relation`),
+        `Updated_At` = CURRENT_TIMESTAMP
+	WHERE `ID` = ID;
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 /*!50003 DROP PROCEDURE IF EXISTS `UpdateMasterTask` */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
@@ -2227,4 +2274,4 @@ DELIMITER ;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2024-12-04 19:03:40
+-- Dump completed on 2024-12-08  0:37:31

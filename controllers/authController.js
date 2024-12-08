@@ -1,6 +1,8 @@
 const authService = require('../services/authService');
 const upload = require('../middlewares/authMiddleware');
 
+const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+const phoneRegex = /^\+?[1-9]\d{1,14}$/;
 
 const authController = {
     signUp: async (req, res) => {
@@ -54,6 +56,36 @@ const authController = {
             res.status(500).json({ error: error.message });
         }
     },
+
+    updateUser: async (req, res) => {
+        try {
+            const { userData } = req.body;
+            const { id } = req.params;
+    
+            console.log(userData);
+            console.log("here");
+    
+            if (userData.email && !emailRegex.test(userData.email)) {
+                return res.status(400).json({ error: "Invalid email format" });
+            }
+    
+            if (userData.phoneNumber && !phoneRegex.test(userData.phoneNumber)) {
+                return res.status(400).json({ error: "Invalid phone number format" });
+            }
+    
+            if (userData.emergencyContactPhoneNumber && !phoneRegex.test(userData.emergencyContactPhoneNumber)) {
+                return res.status(400).json({ error: "Invalid emergency contact phone number format" });
+            }
+    
+            const updatedUser = await authService.updateUser(id, userData);
+    
+            res.status(200).json({ message: "User updated successfully" });
+    
+        } catch (error) {
+            res.status(500).json({ error: "There was an error updating this user" });
+            console.error(error);
+        }
+    }
 
 };
 
