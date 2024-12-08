@@ -17,7 +17,7 @@ const authController = {
                 await authService.signUp(userData);
                 res.status(201).json({ message: 'User created successfully' });
             } catch (error) {
-                console.error('SignUp Error:', error); // Log the error for debugging
+                console.error('SignUp Error:', error); 
                 res.status(400).json({ error: error.message });
             }
         });

@@ -60,7 +60,8 @@ const User = sequelize.define('User', {
         allowNull: true,
     }
 }, {
-    timestamps: false // Disable automatic timestamps
+    tableName: 'users',
+    timestamps: false 
 });
 
 module.exports = User;
