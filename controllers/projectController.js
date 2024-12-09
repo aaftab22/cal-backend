@@ -6,8 +6,8 @@ const upload = require("../middlewares/multerConfig");
 const subtaskService = require("../services/subtaskService");
 const authService = require("../services/authService");
 const fs = require("fs");
-const sequelize = require('../config/database');
-const dotenv = require('dotenv');
+const sequelize = require("../config/database");
+const dotenv = require("dotenv");
 
 dotenv.config();
 
@@ -22,7 +22,6 @@ const {
 const BucketName = "caliber-space";
 const expiryTime = 3600;
 
-
 const space = new S3Client({
   endpoint: "https://tor1.digitaloceanspaces.com",
   region: "ca-central-1",
@@ -31,7 +30,6 @@ const space = new S3Client({
     secretAccessKey: process.env.SPACES_ACCESS_SECRET_KEY,
   },
 });
-
 
 const projectController = {
   //Projects Table Functions
@@ -46,6 +44,7 @@ const projectController = {
       projectDetails.Contact_Phone = projectData.Contact_Phone;
       projectDetails.Contact_Email = projectData.Contact_Email;
       projectDetails.Created_By = projectData.Created_By;
+      projectDetails.Status = projectData.Status || "Not Started";
 
       const { insertedId } = await projectService.createProject(projectDetails);
 
@@ -82,15 +81,15 @@ const projectController = {
 
       if (attachments.length > 0) {
         for (const file of attachments) {
-          console.log(file)
+          console.log(file);
           try {
             const s3Key = `projects/${insertedId}/${file.originalname}`;
             const uploadParams = {
               Bucket: BucketName,
               Key: s3Key,
-              Body: fs.readFileSync(file.path), 
+              Body: fs.readFileSync(file.path),
               ContentType: file.mimetype,
-              ACL: "public-read", 
+              ACL: "public-read",
             };
             const uploadCommand = new PutObjectCommand(uploadParams);
             const response = await space.send(uploadCommand);
@@ -99,10 +98,13 @@ const projectController = {
               Project_ID: insertedId,
               Attachment_Name: file.originalname,
               Attachment_Type: req.body.Attachment_Type || "Document",
-              File_Format: path.extname(file.originalname).substring(1).toUpperCase(),
-              File_Path: `https://${BucketName}.s3.amazonaws.com/${s3Key}`, 
+              File_Format: path
+                .extname(file.originalname)
+                .substring(1)
+                .toUpperCase(),
+              File_Path: `https://${BucketName}.s3.amazonaws.com/${s3Key}`,
             };
-      
+
             console.log("Attachment Data:", attachmentData);
             await attachmentService.createAttachment(attachmentData);
             fs.unlinkSync(file.path);
@@ -141,17 +143,25 @@ const projectController = {
         Contact_Phone: projectData.Contact_Phone,
         Contact_Email: projectData.Contact_Email,
         Created_By: projectData.Created_By,
+        Status: projectDetails.Status || "Not Started",
       };
 
-      await projectService.updateProject(projectId, projectDetails,{ transaction });
-
+      await projectService.updateProject(projectId, projectDetails, {
+        transaction,
+      });
 
       // First deleting the existing content
-      const project = await projectService.getProjectTaskById(projectId,{ transaction })
-      const projectJson = Object.values(project[0])
-      const existingProjectTasks = projectJson.map(item => item.project_task_id);
-      for (let i = 0; i<existingProjectTasks.length;i++){
-        projectService.deleteProjectTask(existingProjectTasks[i],{ transaction })
+      const project = await projectService.getProjectTaskById(projectId, {
+        transaction,
+      });
+      const projectJson = Object.values(project[0]);
+      const existingProjectTasks = projectJson.map(
+        (item) => item.project_task_id
+      );
+      for (let i = 0; i < existingProjectTasks.length; i++) {
+        projectService.deleteProjectTask(existingProjectTasks[i], {
+          transaction,
+        });
       }
       // Recreating it
       const Tasklist = projectData.Tasklist;
@@ -160,31 +170,43 @@ const projectController = {
           Project_ID: projectId,
           Task_ID: Tasklist[i].Task_ID,
         };
-        await projectService.createProjectTask(taskData,{ transaction });
+        await projectService.createProjectTask(taskData, { transaction });
 
         const currTask = Tasklist[i];
 
-
-        const projectsub = await projectService.getSubtasksByProject(projectId,{ transaction });
-        const existingProjectSubTasks = projectsub.map(item => item.project_subtask_id);
-        for (let i = 0; i<existingProjectSubTasks.length;i++){
-          projectService.deleteProjectSubTask(existingProjectSubTasks[i],{ transaction })
+        const projectsub = await projectService.getSubtasksByProject(
+          projectId,
+          { transaction }
+        );
+        const existingProjectSubTasks = projectsub.map(
+          (item) => item.project_subtask_id
+        );
+        for (let i = 0; i < existingProjectSubTasks.length; i++) {
+          projectService.deleteProjectSubTask(existingProjectSubTasks[i], {
+            transaction,
+          });
         }
-
 
         for (let j = 0; j < (currTask.Subtasklist || []).length; j++) {
           const tempSubTask = {
             Project_ID: projectId,
             Subtask_ID: currTask.Subtasklist[j].Subtask_ID,
           };
-          await projectService.createProjectSubtask(tempSubTask,{ transaction });
+          await projectService.createProjectSubtask(tempSubTask, {
+            transaction,
+          });
         }
 
-        let assignedTasks = await projectService.getAssignedTasksByProject(projectId,{ transaction });
-        const assignmentIds = assignedTasks.map(item => item.ASSIGNMENT_ID);
+        let assignedTasks = await projectService.getAssignedTasksByProject(
+          projectId,
+          { transaction }
+        );
+        const assignmentIds = assignedTasks.map((item) => item.ASSIGNMENT_ID);
 
-        for (let i = 0; i<assignmentIds.length;i++){
-          projectService.deleteProjectAssignment(assignmentIds[i],{ transaction })
+        for (let i = 0; i < assignmentIds.length; i++) {
+          projectService.deleteProjectAssignment(assignmentIds[i], {
+            transaction,
+          });
         }
 
         for (let j = 0; j < (currTask.Employees || []).length; j++) {
@@ -196,7 +218,7 @@ const projectController = {
             Project_ID: projectId,
             Task_Assigned: currTask.Task_ID,
           };
-          await projectService.AssignTask(tempEmployee,{ transaction });
+          await projectService.AssignTask(tempEmployee, { transaction });
         }
       }
 
@@ -211,7 +233,9 @@ const projectController = {
           };
 
           // Save the new attachment to the database
-          await attachmentService.createAttachment(attachmentData,{ transaction });
+          await attachmentService.createAttachment(attachmentData, {
+            transaction,
+          });
         }
       }
       await transaction.commit();
@@ -398,32 +422,41 @@ const projectController = {
       const attachments = await attachmentService.getByProjectId(currProjectID);
       if (attachments.length > 0) {
         const signedAttachments = [];
-      
+
         for (const attachment of attachments) {
           try {
-            const fileKey = attachment.File_Path.split(`https://${BucketName}.s3.amazonaws.com/`)[1];
-      
+            const fileKey = attachment.File_Path.split(
+              `https://${BucketName}.s3.amazonaws.com/`
+            )[1];
+
             if (!fileKey) {
-              console.error(`Invalid File_Path for attachment: ${attachment.File_Path}`);
+              console.error(
+                `Invalid File_Path for attachment: ${attachment.File_Path}`
+              );
               continue;
             }
-      
+
             const getCommand = new GetObjectCommand({
               Bucket: BucketName,
               Key: fileKey,
             });
-      
-            const signedUrl = await getSignedUrl(space, getCommand, { expiresIn: expiryTime });
-      
+
+            const signedUrl = await getSignedUrl(space, getCommand, {
+              expiresIn: expiryTime,
+            });
+
             signedAttachments.push({
               ...attachment,
               SignedUrl: signedUrl,
             });
           } catch (error) {
-            console.error(`Error generating signed URL for attachment ${attachment.ATTACHMENT_ID}:`, error);
+            console.error(
+              `Error generating signed URL for attachment ${attachment.ATTACHMENT_ID}:`,
+              error
+            );
           }
         }
-      
+
         result.Attachments = signedAttachments;
       } else {
         console.log("No attachments found for the project.");
