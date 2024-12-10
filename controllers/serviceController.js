@@ -24,6 +24,8 @@ const serviceController = {
       serviceDetails.Created_By = serviceData.createdBy;
       serviceDetails.Site_Status = serviceData.siteStatus;
       serviceDetails.Status = serviceData.status;
+      serviceDetails.Contact_First_Name = serviceData.Contact_Last_Name;
+      serviceDetails.Contact_Last_Name = serviceData.Contact_Last_Name;
 
       let id = await serviceCallService.createServiceCall(serviceDetails);
 
@@ -39,7 +41,11 @@ const serviceController = {
             Time_Start: employee.timeStart,
             Time_Finish: employee.timeFinish,
           };
-          return serviceCallService.createServiceCallTask(id["insertedId"],taskData.Task_ID, empData);
+          return serviceCallService.createServiceCallTask(
+            id["insertedId"],
+            taskData.Task_ID,
+            empData
+          );
         })
       );
 
@@ -104,7 +110,8 @@ const serviceController = {
         ? req.body.serviceData
         : JSON.parse(req.body.serviceDataJson).serviceData;
       const serviceDetails = {};
-      serviceDetails.Service_Call_Description =serviceData.serviceCallDescription;
+      serviceDetails.Service_Call_Description =
+        serviceData.serviceCallDescription;
       serviceDetails.Address = serviceData.address;
       serviceDetails.Post_Code = serviceData.postCode;
       serviceDetails.Contact_Phone = serviceData.contactPhone;
@@ -112,47 +119,70 @@ const serviceController = {
       serviceDetails.Created_By = serviceData.createdBy;
       serviceDetails.Site_Status = serviceData.siteStatus;
       serviceDetails.Status = serviceData.status;
+      serviceDetails.Contact_First_Name = serviceData.Contact_First_Name;
+      serviceDetails.Contact_Last_Name = serviceData.Contact_Last_Name;
 
-      const service = await serviceCallService.getServiceTaskById(SERVICE_CALL_ID)
-      const serviceObj = (Object.values(service[0]))
+      const service = await serviceCallService.getServiceTaskById(
+        SERVICE_CALL_ID
+      );
+      const serviceObj = Object.values(service[0]);
       await serviceCallService.updateServiceCall(
         SERVICE_CALL_ID,
         serviceDetails
       );
       // Replaces the task if the task in update is different from the one in the db
-      if(serviceObj[0].Task_ID !== serviceData.task.taskId){
-        serviceCallService.UpdateTaskIdForServiceCall(SERVICE_CALL_ID,serviceData.task.taskId)
+      if (serviceObj[0].Task_ID !== serviceData.task.taskId) {
+        serviceCallService.UpdateTaskIdForServiceCall(
+          SERVICE_CALL_ID,
+          serviceData.task.taskId
+        );
       }
 
+      const subtasks = await serviceCallService.getSubtasksByServiceCall(
+        SERVICE_CALL_ID
+      );
+      const existingSubtaskIds = subtasks.map((item) => item.Subtask_ID);
 
-      const subtasks = await serviceCallService.getSubtasksByServiceCall(SERVICE_CALL_ID);
-      const existingSubtaskIds = subtasks.map(item => item.Subtask_ID);
-      
       // Filtering the new subtasks (that are on the request but not on db) and old ones (that are on db but not request) to know what to remove and what not
       const newSubtasks = serviceData.task.subtasks
-      .filter(item2 => !existingSubtaskIds.includes(parseInt(item2.subtaskId)))
-      .map(item => parseInt(item.subtaskId));
-    
-      const removedSubtasks = subtasks
-        .filter(item => 
-          !serviceData.task.subtasks.some(newItem => newItem.subtaskId === item.Subtask_ID.toString())
+        .filter(
+          (item2) => !existingSubtaskIds.includes(parseInt(item2.subtaskId))
         )
-        .map(item => item.SERVICE_SUBTASK_ID); 
+        .map((item) => parseInt(item.subtaskId));
 
+      const removedSubtasks = subtasks
+        .filter(
+          (item) =>
+            !serviceData.task.subtasks.some(
+              (newItem) => newItem.subtaskId === item.Subtask_ID.toString()
+            )
+        )
+        .map((item) => item.SERVICE_SUBTASK_ID);
 
-      for(let i=0; i<removedSubtasks.length; i++){
-        await serviceCallService.deleteSubtask(removedSubtasks[i])
+      for (let i = 0; i < removedSubtasks.length; i++) {
+        await serviceCallService.deleteSubtask(removedSubtasks[i]);
       }
-      for(let i=0; i<newSubtasks.length; i++){
-        await serviceCallService.createServiceSubtask(SERVICE_CALL_ID,newSubtasks[i])
+      for (let i = 0; i < newSubtasks.length; i++) {
+        await serviceCallService.createServiceSubtask(
+          SERVICE_CALL_ID,
+          newSubtasks[i]
+        );
       }
 
-      const employees = await serviceCallService.getEmployeesByServiceCall(SERVICE_CALL_ID)
-      
-      for(let i = 0;i<(employees || []).length;i++){
-        await serviceCallService.deleteServiceTask(employees[i].SERVICE_TASK_ID)
+      const employees = await serviceCallService.getEmployeesByServiceCall(
+        SERVICE_CALL_ID
+      );
+
+      for (let i = 0; i < (employees || []).length; i++) {
+        await serviceCallService.deleteServiceTask(
+          employees[i].SERVICE_TASK_ID
+        );
       }
-      for (let j = 0; j < (serviceData.task.employeesAssigned || []).length; j++) {
+      for (
+        let j = 0;
+        j < (serviceData.task.employeesAssigned || []).length;
+        j++
+      ) {
         const employee = serviceData.task.employeesAssigned[j];
         const tempEmployee = {
           Employee_ID: employee.employeeId,
@@ -161,9 +191,13 @@ const serviceController = {
           SERVICE_CALL_ID: SERVICE_CALL_ID,
           Task_Assigned: serviceData.task.taskId,
         };
-        console.log("a")
-        await serviceCallService.createServiceCallTask(SERVICE_CALL_ID,serviceData.task.taskId,tempEmployee);
-        console.log("b")
+        console.log("a");
+        await serviceCallService.createServiceCallTask(
+          SERVICE_CALL_ID,
+          serviceData.task.taskId,
+          tempEmployee
+        );
+        console.log("b");
       }
 
       if (req.files && req.files.attachments) {
@@ -207,6 +241,10 @@ const serviceController = {
         serviceDetails.serviceData.createdBy = serviceData[i].Created_By;
         serviceDetails.serviceData.siteStatus = serviceData[i].Site_Status;
         serviceDetails.serviceData.status = serviceData[i].Status;
+        (serviceDetails.serviceData.Contact_First_Name =
+          serviceData[i].Contact_First_Name),
+          (serviceDetails.serviceData.Contact_Last_Name =
+            serviceData[i].Contact_Last_Name);
 
         const employees = await serviceCallService.getEmployeesByServiceCall(
           serviceData[i].SERVICE_CALL_ID
@@ -313,6 +351,8 @@ const serviceController = {
         createdBy: item[0].Created_By,
         updatedAt: item[0].Updated_At,
         status: item[0].Status,
+        Contact_First_Name: item[0].Contact_First_Name,
+        Contact_Last_Name: item[0].Contact_Last_Name,
       };
 
       const employees = await serviceCallService.getEmployeesByServiceCall(

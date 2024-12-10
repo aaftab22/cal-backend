@@ -34,6 +34,7 @@ const space = new S3Client({
 const projectController = {
   //Projects Table Functions
   createProject: async (req, res) => {
+    const transaction = await sequelize.transaction();
     try {
       const projectData = JSON.parse(req.body.projectData);
       //PROJECT DETAILS
@@ -44,11 +45,14 @@ const projectController = {
       projectDetails.Contact_Phone = projectData.Contact_Phone;
       projectDetails.Contact_Email = projectData.Contact_Email;
       projectDetails.Created_By = projectData.Created_By;
-      projectDetails.Status = projectData.Status || "Not Started";
 
-      const { insertedId } = await projectService.createProject(projectDetails);
-
+      const { insertedId } = await projectService.createProject(
+        projectDetails,
+        transaction
+      );
       //PROJECT TASKLIST
+
+      console.log(insertedId);
       const Tasklist = projectData.Tasklist;
 
       for (let i = 0; i < Tasklist.length; i++) {
@@ -56,14 +60,14 @@ const projectController = {
         taskData.Project_ID = insertedId;
         taskData.Task_ID = Tasklist[i].Task_ID;
         currTask = Tasklist[i];
-        await projectService.createProjectTask(taskData);
+        await projectService.createProjectTask(taskData, transaction);
 
         //PROJECT SUBTASKLIST
         for (let i = 0; i < currTask.Subtasklist.length; i++) {
           tempSubTask = {};
           tempSubTask.Project_ID = insertedId;
           tempSubTask.Subtask_ID = currTask.Subtasklist[i].Subtask_ID;
-          await projectService.createProjectSubtask(tempSubTask);
+          await projectService.createProjectSubtask(tempSubTask, transaction);
         }
         //PROJECT EMPLOYEE
         for (let i = 0; i < currTask.Employees.length; i++) {
@@ -72,7 +76,7 @@ const projectController = {
           tempEmployee.Project_ID = insertedId;
           tempEmployee.Task_Assigned = currTask.Task_ID;
           // console.log(tempEmployee);
-          await projectService.AssignTask(tempEmployee);
+          await projectService.AssignTask(tempEmployee, transaction);
         }
       }
 
@@ -105,8 +109,11 @@ const projectController = {
               File_Path: `https://${BucketName}.s3.amazonaws.com/${s3Key}`,
             };
 
-            console.log("Attachment Data:", attachmentData);
-            await attachmentService.createAttachment(attachmentData);
+            console.log("Attachment Data:", attachmentData, transaction);
+            await attachmentService.createAttachment(
+              attachmentData,
+              transaction
+            );
             fs.unlinkSync(file.path);
           } catch (error) {
             console.error("Error uploading file to S3:", error);
@@ -116,12 +123,14 @@ const projectController = {
         console.log("No attachments uploaded.");
       }
 
+      await transaction.commit();
       // Respond with success
       res.status(201).json({
         message: "Project created successfully",
         projectId: insertedId,
       });
     } catch (error) {
+      await transaction.rollback();
       console.error("Error in createProject:", error);
       res.status(500).json({
         message: "An error occurred while creating the project",
@@ -132,10 +141,14 @@ const projectController = {
 
   updateProject: async (req, res) => {
     const transaction = await sequelize.transaction();
+
     try {
       const projectId = req.params.id;
-      const projectData = JSON.parse(req.body.projectData);
+      const projectData = req.body.projectData
+        ? req.body.projectData
+        : JSON.parse(req.body.projectDataJson).projectData;
 
+      console.log("project data ", projectData);
       const projectDetails = {
         Project_Description: projectData.Project_Description,
         Address: projectData.Address,
@@ -143,70 +156,87 @@ const projectController = {
         Contact_Phone: projectData.Contact_Phone,
         Contact_Email: projectData.Contact_Email,
         Created_By: projectData.Created_By,
-        Status: projectDetails.Status || "Not Started",
+        Status: projectData.Status,
       };
 
-      await projectService.updateProject(projectId, projectDetails, {
-        transaction,
-      });
+      await projectService.updateProject(
+        projectId,
+        projectDetails,
+        transaction
+      );
 
       // First deleting the existing content
-      const project = await projectService.getProjectTaskById(projectId, {
-        transaction,
-      });
-      const projectJson = Object.values(project[0]);
-      const existingProjectTasks = projectJson.map(
-        (item) => item.project_task_id
+      const project = await projectService.getProjectTaskById(
+        projectId,
+        transaction
       );
-      for (let i = 0; i < existingProjectTasks.length; i++) {
-        projectService.deleteProjectTask(existingProjectTasks[i], {
-          transaction,
-        });
-      }
-      // Recreating it
-      const Tasklist = projectData.Tasklist;
-      for (let i = 0; i < Tasklist.length; i++) {
-        const taskData = {
-          Project_ID: projectId,
-          Task_ID: Tasklist[i].Task_ID,
-        };
-        await projectService.createProjectTask(taskData, { transaction });
 
-        const currTask = Tasklist[i];
+      const projectJson = Object.values(project[0]);
 
-        const projectsub = await projectService.getSubtasksByProject(
+      const projectJsonTaskIds = projectJson.map((item) => item.Task_ID);
+
+      const newTasks = projectData.Tasklist.filter(
+        (task) => !projectJsonTaskIds.includes(task.Task_ID)
+      ).map((task) => task.Task_ID);
+
+      const removedTasks = projectJson
+        .filter(
+          (jsonTask) =>
+            !projectData.Tasklist.some(
+              (task) => task.Task_ID === jsonTask.Task_ID
+            )
+        )
+        .map((jsonTask) => jsonTask.project_task_id);
+
+      const matchingTasks = projectJson
+        .filter((jsonTask) =>
+          projectData.Tasklist.some((task) => task.Task_ID === jsonTask.Task_ID)
+        )
+        .map((jsonTask) => ({
+          ...jsonTask,
+          ...projectData.Tasklist.find(
+            (task) => task.Task_ID === jsonTask.Task_ID
+          ),
+        }));
+
+      console.log("New Tasks:", newTasks);
+      console.log("Removed Tasks:", removedTasks);
+      console.log("Matching Tasks:", matchingTasks);
+
+      // Deleting tasks and subtasks for instance
+      for (let i = 0; i < removedTasks.length; i++) {
+        await projectService.deleteProjectTaskPT(
           projectId,
-          { transaction }
+          removedTasks[i],
+          transaction
         );
-        const existingProjectSubTasks = projectsub.map(
-          (item) => item.project_subtask_id
+        await projectService.deleteSubtaskByTask(
+          removedTasks[i],
+          projectId,
+          transaction
         );
-        for (let i = 0; i < existingProjectSubTasks.length; i++) {
-          projectService.deleteProjectSubTask(existingProjectSubTasks[i], {
-            transaction,
-          });
-        }
+        await projectService.deleteAssignmentByProject(
+          removedTasks[i],
+          projectId,
+          transaction
+        );
+      }
+
+      for (let i = 0; i < newTasks.length; i++) {
+        await projectService.createProjectTask(
+          { projectId, taskId: newTasks[i] },
+          transaction
+        );
+
+        const currTask = projectData.Tasklist.find(
+          (task) => task.Task_ID === newTasks[i]
+        );
 
         for (let j = 0; j < (currTask.Subtasklist || []).length; j++) {
-          const tempSubTask = {
-            Project_ID: projectId,
-            Subtask_ID: currTask.Subtasklist[j].Subtask_ID,
-          };
-          await projectService.createProjectSubtask(tempSubTask, {
-            transaction,
-          });
-        }
-
-        let assignedTasks = await projectService.getAssignedTasksByProject(
-          projectId,
-          { transaction }
-        );
-        const assignmentIds = assignedTasks.map((item) => item.ASSIGNMENT_ID);
-
-        for (let i = 0; i < assignmentIds.length; i++) {
-          projectService.deleteProjectAssignment(assignmentIds[i], {
-            transaction,
-          });
+          await projectService.createProjectSubtask(
+            { projectId, subtaskId: currTask.Subtasklist[j].Subtask_ID },
+            transaction
+          );
         }
 
         for (let j = 0; j < (currTask.Employees || []).length; j++) {
@@ -218,24 +248,7 @@ const projectController = {
             Project_ID: projectId,
             Task_Assigned: currTask.Task_ID,
           };
-          await projectService.AssignTask(tempEmployee, { transaction });
-        }
-      }
-
-      if (req.files && req.files.attachments) {
-        for (const file of req.files.attachments) {
-          const attachmentData = {
-            Project_ID: projectId,
-            Attachment_Name: file.originalname,
-            Attachment_Type: file.mimetype || "Other",
-            File_Format: path.extname(file.originalname).slice(1),
-            File_Path: file.path,
-          };
-
-          // Save the new attachment to the database
-          await attachmentService.createAttachment(attachmentData, {
-            transaction,
-          });
+          await projectService.AssignTask(tempEmployee, transaction);
         }
       }
       await transaction.commit();
@@ -357,6 +370,7 @@ const projectController = {
 
       const projectData = Object.values(project[0]);
       const currProjectID = projectData[0].PROJECT_ID;
+
       const result = {};
       // console.log(projectData[0]);
       result.ProjectData = projectData[0];
@@ -392,7 +406,6 @@ const projectController = {
           tempSubTask.Related_Task = masterSubtaskData.Related_Task;
 
           if (tempSubTask.Related_Task == taskStructure.Task_ID) {
-            console.log("MATCHING TASK");
             taskStructure.Subtasks.push(tempSubTask);
           }
         }
@@ -415,7 +428,6 @@ const projectController = {
         }
 
         result.Tasks.push(taskStructure);
-        // console.log(result);
       }
       timeframe = await projectService.getTimeFrameByProject(currProjectID);
       result.Timeframe = timeframe;

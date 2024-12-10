@@ -155,7 +155,7 @@ CREATE TABLE `projects` (
   `Created_At` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `Created_By` int DEFAULT NULL,
   `Updated_At` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  `Status` enum('Pending','In Progress','Completed') DEFAULT 'Pending',
+  `Status` enum('In Progress','Completed','Not Started') NOT NULL DEFAULT 'Not Started',
   PRIMARY KEY (`PROJECT_ID`),
   KEY `Created_By` (`Created_By`),
   CONSTRAINT `projects_ibfk_1` FOREIGN KEY (`Created_By`) REFERENCES `users` (`ID`)
@@ -168,7 +168,7 @@ CREATE TABLE `projects` (
 
 LOCK TABLES `projects` WRITE;
 /*!40000 ALTER TABLE `projects` DISABLE KEYS */;
-INSERT INTO `projects` VALUES (1,'Development of a new residential building','123 Queen St, Toronto','L4R 7T6','123-456-7890','daniel@example.com','2024-11-19 17:17:33',1,'2024-11-19 17:17:33','Pending'),(2,'Development of a recreational park with a children’s play area and a walking track.','753 Cherry Ave, City 10','P8Q 9R1','519-890-1234','user10@example.com','2024-11-19 18:14:47',9,'2024-11-19 18:14:47','Pending'),(3,'Renovation of a residential house to include new flooring and updated lighting fixtures.','123 Maple St, City 3','B2C 3D4','613-123-4567','user3@example.com','2024-11-19 18:17:54',2,'2024-11-19 18:17:54','Pending'),(4,'High-Rise Building Construction','102 Sky Avenue, Downtown','A1B 2C3','123-456-7890','manager@highrisebuilders.com','2024-11-19 18:21:37',1,'2024-11-19 18:21:37','Pending'),(5,'Renovation of Maple Community Centre, including interior redesign, electrical upgrades, and landscaping to enhance functionality and aesthetics.','75 Maplewood Avenue, Toronto, ON','M4Y 1A7','416-789-1234','admin@maplerenovations.ca','2024-11-19 18:27:31',1,'2024-11-19 18:27:31','Pending'),(6,'Development of the Oakwood Public Library, focusing on structural improvements, modern technology installations, and accessibility enhancements for better community use.','123 Oakwood Drive, Ottawa, ON','K1Y 4E4','613-456-7890','info@oakwoodlibrary.ca','2024-11-19 18:29:29',1,'2024-11-19 18:29:29','Pending'),(7,'Renovation of a community hall focusing on lighting and seating arrangements for better events.','245 Maple Avenue, Toronto, ON','M4C 1J9','416-567-8901','hall_renovation@community.ca','2024-11-19 18:37:15',1,'2024-11-19 18:37:15','Pending'),(8,'Construction of a residential complex with multiple buildings, underground parking, and green spaces for community use.','987 Greenfield Crescent, Mississauga, ON','L5A 4C7','905-345-7890','residential_project@build.ca','2024-11-19 18:37:29',1,'2024-11-19 18:37:29','Pending'),(9,'Revamping of a heritage site, including structural repairs and setting up a visitor\'s center.','102 Heritage Lane, Kingston, ON','K7L 3N6','613-765-4321','heritage_update@historica.ca','2024-11-19 18:37:41',1,'2024-11-19 18:37:41','Pending'),(10,'Upgrade of electrical wiring and installation of energy-efficient lighting in a public school.','310 School Street, Hamilton, ON','L8N 1A1','905-789-1234','school_upgrade@edu.ca','2024-11-19 18:37:51',1,'2024-11-19 18:37:51','Pending'),(11,'Development of a multi-functional community center, including sports facilities, conference rooms, and a recreational park.','789 Community Drive, Ottawa, ON','K1A 0B1','613-456-7890','community_center@cityprojects.ca','2024-11-19 18:40:00',1,'2024-11-19 18:40:00','Pending');
+INSERT INTO `projects` VALUES (1,'Project 1','123 Queen St, Toronto','L4R 7T6','123-456-7890','daniel@example.com','2024-11-19 17:17:33',1,'2024-12-09 21:28:43','Not Started'),(2,'Development of a recreational park with a children’s play area and a walking track.','753 Cherry Ave, City 10','P8Q 9R1','519-890-1234','user10@example.com','2024-11-19 18:14:47',9,'2024-12-09 06:12:37','In Progress'),(3,'Renovation of a residential house to include new flooring and updated lighting fixtures.','123 Maple St, City 3','B2C 3D4','613-123-4567','user3@example.com','2024-11-19 18:17:54',2,'2024-12-09 06:13:57','Completed'),(4,'High-Rise Building Construction','102 Sky Avenue, Downtown','A1B 2C3','123-456-7890','manager@highrisebuilders.com','2024-11-19 18:21:37',1,'2024-12-09 06:13:57','Completed'),(5,'Renovation of Maple Community Centre, including interior redesign, electrical upgrades, and landscaping to enhance functionality and aesthetics.','75 Maplewood Avenue, Toronto, ON','M4Y 1A7','416-789-1234','admin@maplerenovations.ca','2024-11-19 18:27:31',1,'2024-12-09 06:12:37','In Progress'),(6,'Development of the Oakwood Public Library, focusing on structural improvements, modern technology installations, and accessibility enhancements for better community use.','123 Oakwood Drive, Ottawa, ON','K1Y 4E4','613-456-7890','info@oakwoodlibrary.ca','2024-11-19 18:29:29',1,'2024-12-09 06:13:57','Not Started'),(7,'Renovation of a community hall focusing on lighting and seating arrangements for better events.','245 Maple Avenue, Toronto, ON','M4C 1J9','416-567-8901','hall_renovation@community.ca','2024-11-19 18:37:15',1,'2024-12-09 06:12:37','In Progress'),(8,'Construction of a residential complex with multiple buildings, underground parking, and green spaces for community use.','987 Greenfield Crescent, Mississauga, ON','L5A 4C7','905-345-7890','residential_project@build.ca','2024-11-19 18:37:29',1,'2024-12-09 06:13:57','Completed'),(9,'Revamping of a heritage site, including structural repairs and setting up a visitor\'s center.','102 Heritage Lane, Kingston, ON','K7L 3N6','613-765-4321','heritage_update@historica.ca','2024-11-19 18:37:41',1,'2024-12-09 06:13:57','Not Started'),(10,'Upgrade of electrical wiring and installation of energy-efficient lighting in a public school.','310 School Street, Hamilton, ON','L8N 1A1','905-789-1234','school_upgrade@edu.ca','2024-11-19 18:37:51',1,'2024-12-09 06:13:57','Not Started'),(11,'Development of a multi-functional community center, including sports facilities, conference rooms, and a recreational park.','789 Community Drive, Ottawa, ON','K1A 0B1','613-456-7890','community_center@cityprojects.ca','2024-11-19 18:40:00',1,'2024-12-09 06:13:57','Completed');
 /*!40000 ALTER TABLE `projects` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -247,15 +247,17 @@ DROP TABLE IF EXISTS `service_calls`;
 CREATE TABLE `service_calls` (
   `SERVICE_CALL_ID` int NOT NULL AUTO_INCREMENT,
   `Service_Call_Description` varchar(256) DEFAULT NULL,
+  `Contact_First_Name` varchar(64) DEFAULT NULL,
+  `Contact_Last_Name` varchar(64) DEFAULT NULL,
   `Address` varchar(256) DEFAULT NULL,
   `Post_Code` varchar(10) DEFAULT NULL,
   `Contact_Phone` varchar(16) DEFAULT NULL,
   `Contact_Email` varchar(64) DEFAULT NULL,
-  `Site_Status` enum('OnSite','OffSite') DEFAULT NULL,
+  `Site_Status` enum('Onsite','Offsite') NOT NULL DEFAULT 'Offsite',
   `Created_At` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `Created_By` int DEFAULT NULL,
   `Updated_At` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  `Status` enum('Pending','In Progress','Completed') DEFAULT 'Pending',
+  `Status` enum('In Progress','Completed','Not Started') NOT NULL DEFAULT 'Not Started',
   PRIMARY KEY (`SERVICE_CALL_ID`),
   KEY `Created_By` (`Created_By`),
   CONSTRAINT `service_calls_ibfk_1` FOREIGN KEY (`Created_By`) REFERENCES `users` (`ID`)
@@ -268,7 +270,7 @@ CREATE TABLE `service_calls` (
 
 LOCK TABLES `service_calls` WRITE;
 /*!40000 ALTER TABLE `service_calls` DISABLE KEYS */;
-INSERT INTO `service_calls` VALUES (1,'Perform routine HVAC maintenance and check for air filter replacements in the downtown office.','123 Maple Avenue, Toronto, ON','M4C 1L5','416-555-1234','maintenance@downtownoffice.com','OnSite','2024-11-19 18:44:32',1,'2024-11-19 18:44:32','Pending'),(2,'Inspect and repair electrical wiring in the living room and install new lighting fixtures.','123 Bayview Avenue, Toronto, ON','M5J 2R8','416-555-1234','electrical@fixpro.ca','','2024-11-19 19:00:20',3,'2024-11-19 19:00:20',''),(3,'Inspect and repair HVAC system in the residential complex.','250 Wellington Street West, Toronto, ON','M5V 3P6','416-555-8790','hvac.repairs@servicefix.ca','OnSite','2024-11-19 20:21:44',2,'2024-11-19 20:21:44','Pending'),(4,'Install new security cameras and configure the system.','40 Bay Street, Toronto, ON','M5J 2X2','647-555-1234','security@techinstall.ca','OnSite','2024-11-19 20:25:00',3,'2024-11-19 20:25:00','Pending'),(5,'Repair and calibrate heating system in the main office.','123 Queen Street West, Toronto, ON','M5H 2M9','416-555-6789','heating@repairservices.ca','OffSite','2024-11-19 20:26:46',5,'2024-11-19 20:26:46','Pending'),(6,'Install new security cameras at the warehouse.','75 Wellington Street West, Toronto, ON','M5K 1H1','416-555-9090','security@installations.ca','OffSite','2024-11-19 20:35:05',3,'2024-11-19 20:35:05','Pending'),(7,'Upgrade electrical wiring for office lighting.','200 University Avenue, Waterloo, ON','N2L 3G1','519-555-5555','electric@upgrades.ca','OffSite','2024-11-19 20:35:17',6,'2024-11-19 20:35:17','Pending'),(8,'Inspect plumbing systems for leaks and repair faulty pipes.','60 Bay Street, Hamilton, ON','L8P 4Z5','905-555-2323','plumbing@inspection.ca','OffSite','2024-11-19 20:35:25',2,'2024-11-19 20:35:25','Pending'),(9,'Repair HVAC system in the community center.','123 King Street West, Mississauga, ON','L5B 1C4','905-555-7890','hvac@repairs.ca','OffSite','2024-11-19 20:37:07',5,'2024-11-19 20:37:07','Pending'),(10,'Install new fire alarm system in the library.','89 Queen Street East, Brampton, ON','L6V 1A1','905-555-1234','firealarms@install.ca','OffSite','2024-11-19 20:37:17',4,'2024-11-19 20:37:17','Pending'),(11,'Upgrade network cabling for high-speed internet.','45 Front Street North, Orillia, ON','L3V 4S1','705-555-6789','network@upgrade.ca','OffSite','2024-11-19 20:39:05',3,'2024-11-19 20:39:05','Pending');
+INSERT INTO `service_calls` VALUES (1,'Perform routine HVAC maintenance and check for air filter replacements in the downtown office.',NULL,NULL,'123 Maple Avenue, Toronto, ON','M4C 1L5','416-555-1234','maintenance@downtownoffice.com','Onsite','2024-11-19 18:44:32',1,'2024-12-09 06:14:46','In Progress'),(2,'Inspect and repair electrical wiring in the living room and install new lighting fixtures.',NULL,NULL,'123 Bayview Avenue, Toronto, ON','M5J 2R8','416-555-1234','electrical@fixpro.ca','Offsite','2024-11-19 19:00:20',3,'2024-12-09 06:19:06','Completed'),(3,'Inspect and repair HVAC system in the residential complex.',NULL,NULL,'250 Wellington Street West, Toronto, ON','M5V 3P6','416-555-8790','hvac.repairs@servicefix.ca','Onsite','2024-11-19 20:21:44',2,'2024-12-09 06:16:10','Not Started'),(4,'Install new security cameras and configure the system.',NULL,NULL,'40 Bay Street, Toronto, ON','M5J 2X2','647-555-1234','security@techinstall.ca','Onsite','2024-11-19 20:25:00',3,'2024-12-09 06:16:10','Completed'),(5,'Repair and calibrate heating system in the main office.',NULL,NULL,'123 Queen Street West, Toronto, ON','M5H 2M9','416-555-6789','heating@repairservices.ca','Offsite','2024-11-19 20:26:46',5,'2024-12-09 06:16:10','Completed'),(6,'Install new security cameras at the warehouse.',NULL,NULL,'75 Wellington Street West, Toronto, ON','M5K 1H1','416-555-9090','security@installations.ca','Offsite','2024-11-19 20:35:05',3,'2024-12-09 06:16:10','Not Started'),(7,'Upgrade electrical wiring for office lighting.',NULL,NULL,'200 University Avenue, Waterloo, ON','N2L 3G1','519-555-5555','electric@upgrades.ca','Offsite','2024-11-19 20:35:17',6,'2024-12-09 06:16:10','Completed'),(8,'Inspect plumbing systems for leaks and repair faulty pipes.',NULL,NULL,'60 Bay Street, Hamilton, ON','L8P 4Z5','905-555-2323','plumbing@inspection.ca','Offsite','2024-11-19 20:35:25',2,'2024-12-09 06:14:46','In Progress'),(9,'Repair HVAC system in the community center.',NULL,NULL,'123 King Street West, Mississauga, ON','L5B 1C4','905-555-7890','hvac@repairs.ca','Offsite','2024-11-19 20:37:07',5,'2024-12-09 06:16:10','Completed'),(10,'Install new fire alarm system in the library.',NULL,NULL,'89 Queen Street East, Brampton, ON','L6V 1A1','905-555-1234','firealarms@install.ca','Offsite','2024-11-19 20:37:17',4,'2024-12-09 06:16:10','Completed'),(11,'Upgrade network cabling for high-speed internet.',NULL,NULL,'45 Front Street North, Orillia, ON','L3V 4S1','705-555-6789','network@upgrade.ca','Offsite','2024-11-19 20:39:05',3,'2024-12-09 06:16:10','Not Started');
 /*!40000 ALTER TABLE `service_calls` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -608,7 +610,7 @@ BEGIN
         Created_At TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         Created_By INT,
         Updated_At TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-        Status ENUM('Pending', 'In Progress', 'Completed') DEFAULT 'Pending',
+        Status ENUM('Not Started', 'In Progress', 'Completed') DEFAULT 'Not Started',
         FOREIGN KEY (Created_By) REFERENCES USERS(ID)
     );
 
@@ -662,7 +664,7 @@ BEGIN
         Created_At TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         Created_By INT,
         Updated_At TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-        Status ENUM('Pending', 'In Progress', 'Completed') DEFAULT 'Pending',
+        Status ENUM('Not Started', 'In Progress', 'Completed') DEFAULT 'Not Started',
         FOREIGN KEY (Created_By) REFERENCES USERS(ID)
     );
     
@@ -771,7 +773,7 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `CreateProject`(
 )
 BEGIN
     IF p_status IS NULL OR p_status = '' THEN
-        SET p_status = 'Pending';
+        SET p_status = 'Not Started';
     END IF;
 
     INSERT INTO PROJECTS (
@@ -846,9 +848,9 @@ DELIMITER ;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
 /*!50003 SET @saved_col_connection = @@collation_connection */ ;
-/*!50003 SET character_set_client  = utf8mb3 */ ;
-/*!50003 SET character_set_results = utf8mb3 */ ;
-/*!50003 SET collation_connection  = utf8mb3_general_ci */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'NO_AUTO_VALUE_ON_ZERO' */ ;
 DELIMITER ;;
@@ -860,11 +862,13 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `CreateServiceCall`(
     IN _Contact_Email VARCHAR(64),
     IN _Site_Status VARCHAR(20),
     IN _Created_By INT,
-    IN _Status VARCHAR(20)
+    IN _Status VARCHAR(20),
+    IN _Contact_First_Name VARCHAR(64),
+    IN _Contact_Last_Name VARCHAR(64)
 )
 BEGIN
     IF _Status IS NULL OR _Status = '' THEN
-        SET _Status = 'Pending';
+        SET _Status = 'Not Started';
     END IF;
 
     INSERT INTO SERVICE_CALLS (
@@ -875,7 +879,9 @@ BEGIN
         Contact_Email,
         Site_Status, 
         Created_By,
-        Status
+        Status,
+        Contact_First_Name,
+        Contact_Last_Name
     ) VALUES (
         _Service_Call_Description,
         _Address,
@@ -884,7 +890,9 @@ BEGIN
         _Contact_Email,
         _Site_Status, 
         _Created_By,
-        _Status
+        _Status,
+        _Contact_First_Name,
+        _Contact_Last_Name
     );
 
     SELECT LAST_INSERT_ID() AS insertedId;
@@ -1085,6 +1093,30 @@ DELIMITER ;;
 CREATE DEFINER=`root`@`localhost` PROCEDURE `CreateUserSpecialty`(IN User_ID INT, IN Specialty INT)
 BEGIN
 	INSERT INTO USER_SPECIALTIES(Task_ID, User_ID) VALUES (Specialty, User_ID);
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `DeleteAssignmentByProject` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'NO_AUTO_VALUE_ON_ZERO' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `DeleteAssignmentByProject`(
+    IN _PROJECT_ID INT,
+    IN _TASK_ID INT
+)
+BEGIN
+	DELETE FROM task_assignments 
+	WHERE task_assigned = _TASK_ID
+	AND project_id = _PROJECT_ID;
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -1337,6 +1369,35 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `DeleteSubtaskProjectAssignment`(
 BEGIN
     DELETE FROM project_subtasklist 
     WHERE PROJECT_SUBTASK_ID = _PROJECT_SUBTASK_ID;
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `DeleteSubtasksForTaskAndProject` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `DeleteSubtasksForTaskAndProject`(
+    IN task_id INT,
+    IN project_id INT
+)
+BEGIN
+    DELETE ps
+    FROM project_subtasklist ps
+    JOIN subtasklist sl 
+        ON ps.subtask_id = sl.subtask_id
+    JOIN task_assignments ta 
+        ON ta.Project_ID = ps.Project_ID
+    WHERE sl.related_task = task_id
+      AND ta.project_id = project_id;
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -2075,7 +2136,7 @@ DELIMITER ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
 CREATE DEFINER=`root`@`localhost` PROCEDURE `UpdateEmployee`(
-	IN ID int,
+    IN p_ID INT,
     IN p_Email VARCHAR(64),
     IN p_Password VARCHAR(64),
     IN p_First_Name VARCHAR(24),
@@ -2104,7 +2165,7 @@ BEGIN
         `Emergency_Contact_Phone_Number` = COALESCE(p_Emergency_Contact_Phone_Number, `Emergency_Contact_Phone_Number`),
         `Emergency_Contact_Relation` = COALESCE(p_Emergency_Contact_Relation, `Emergency_Contact_Relation`),
         `Updated_At` = CURRENT_TIMESTAMP
-	WHERE `ID` = ID;
+    WHERE `users`.`ID` = p_ID;
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -2151,7 +2212,7 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `UpdateProject`(
 )
 BEGIN
     IF p_status IS NULL OR p_status = '' THEN
-        SET p_status = 'Pending';
+        SET p_status = 'Not Started';
     END IF;
 
     UPDATE PROJECTS
@@ -2204,7 +2265,7 @@ DELIMITER ;
 /*!50003 SET character_set_results = utf8mb4 */ ;
 /*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+/*!50003 SET sql_mode              = 'NO_AUTO_VALUE_ON_ZERO' */ ;
 DELIMITER ;;
 CREATE DEFINER=`root`@`localhost` PROCEDURE `UpdateServiceCall`(
 	IN s_id INT,
@@ -2214,11 +2275,13 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `UpdateServiceCall`(
     IN s_contactPhone VARCHAR(16),
     IN s_contactEmail VARCHAR(64),
     IN s_sitestatus VARCHAR(20), 
-    IN s_status VARCHAR(20)
+    IN s_status VARCHAR(20),
+    IN s_contactFirstName VARCHAR(64),
+    IN s_contactLastName VARCHAR(64)
 )
 BEGIN
 	IF s_status IS NULL OR s_status = '' THEN
-        SET s_status = 'Pending';
+        SET s_status = 'Not Started';
     END IF;
     
     UPDATE SERVICE_CALLS
@@ -2230,7 +2293,9 @@ BEGIN
         Contact_Email = s_contactEmail,
         Site_Status = s_sitestatus, 
         Status = s_status,
-        Updated_At = CURRENT_TIMESTAMP
+        Updated_At = CURRENT_TIMESTAMP,
+        Contact_First_Name = s_contactFirstName,
+		Contact_Last_Name = s_contactLastName
     WHERE 
         SERVICE_CALL_ID = s_id
 ;
@@ -2274,4 +2339,4 @@ DELIMITER ;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2024-12-08  0:37:31
+-- Dump completed on 2024-12-09 18:34:24

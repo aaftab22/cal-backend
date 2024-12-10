@@ -13,7 +13,7 @@ const Task = sequelize.define('Task', {
         unique: true  // Ensure Task_Name is unique
     }
 }, {
-    tableName: 'tasklist',
+    tableName: 'TASKLIST',
     timestamps: false
 });
 
