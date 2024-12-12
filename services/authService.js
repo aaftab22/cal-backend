@@ -74,12 +74,12 @@ const authService = {
                         lastName: updatedUser.lastName || null,
                         phoneNumber: updatedUser.phoneNumber || null,
                         address: updatedUser.address || null,
-                        birthDate: updatedUser.birthDate || null,
+                        birthDate: updatedUser.birthday || null,
                         jobTitle: updatedUser.jobTitle || null,
-                        emergencyContactFirstName: updatedUser.emergencyContactFirstName || null,
-                        emergencyContactLastName: updatedUser.emergencyContactLastName || null,
-                        emergencyContactPhoneNumber: updatedUser.emergencyContactPhoneNumber || null,
-                        emergencyContactRelation: updatedUser.emergencyContactRelation || null
+                        emergencyContactFirstName: updatedUser.emergencyFirstName || null,
+                        emergencyContactLastName: updatedUser.emergencyLastName || null,
+                        emergencyContactPhoneNumber: updatedUser.emergencyPhoneNumber || null,
+                        emergencyContactRelation: updatedUser.emergencyRelationship || null
                     },
                     type: sequelize.QueryTypes.RAW
                 }
