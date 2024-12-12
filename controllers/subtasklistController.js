@@ -47,16 +47,3 @@ const subtasklistController = {
 };
 
 module.exports = subtasklistController;
-
-//to create: http://localhost:3001/api/subtasklist/new
-
-// { 
-//     "Subtask_Name":"Test",
-//     "Related_Task":"1"
-// }
-
-//to delete: http://localhost:3001/api/subtasklist/delete
-
-// { 
-//     "Subtask_ID":"1"
-// }

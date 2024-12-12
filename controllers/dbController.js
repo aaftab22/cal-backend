@@ -4,7 +4,6 @@ const projectService = require('../services/projectService');
 const authController = require('./authController');
 const authService = require('../services/authService');
 
-
 const dbController = { 
     GetProjectTaskCategories: async (req,res) => { 
         try { 
@@ -58,50 +57,3 @@ const dbController = {
 };
 
 module.exports = dbController;
-
-// http://localhost:3001/api/taskcategories/get
-// // FORMAT: 
-// // [    
-// //     {
-// //         Task_ID: ? , 
-// //         Task_Name: ? , 
-// //         Subtasks: [
-// //         { 
-// //             SUBTASK_ID: ?, 
-// //             Subtask_Name: ?,
-// //         }, { 
-// //             SUBTASK_ID: ?, 
-// //             Subtask_Name: ?,
-// //         }, { 
-// //             SUBTASK_ID: ?, 
-// //             Subtask_Name: ?,
-// //         }],
-
-// //         Employees: [
-// //         {
-// //             ID: ?
-// //         },{ 
-// //             ID: ?,
-// //         },{ 
-// //             ID: ?,
-// //         },{ 
-// //             ID: ?,
-// //         }]
-// //     },
-
-// //     {
-// //         Task_ID: ? , 
-// //         Task_Name: ? , 
-
-// //         Subtasks: [{ 
-// //             SUBTASK_ID: ?, 
-// //             Subtask_Name: ?,
-// //         }]
-         
-// //         Employees: [{ 
-// //             ID: ?,
-// //         }]
-// //     },
-
-// // ]
-
