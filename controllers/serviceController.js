@@ -24,7 +24,7 @@ const serviceController = {
       serviceDetails.Created_By = serviceData.createdBy;
       serviceDetails.Site_Status = serviceData.siteStatus;
       serviceDetails.Status = serviceData.status;
-      serviceDetails.Contact_First_Name = serviceData.Contact_Last_Name;
+      serviceDetails.Contact_First_Name = serviceData.Contact_First_Name;
       serviceDetails.Contact_Last_Name = serviceData.Contact_Last_Name;
 
       let id = await serviceCallService.createServiceCall(serviceDetails);
