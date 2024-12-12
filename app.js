@@ -8,7 +8,7 @@ const dbRoutes = require('./routes/dbRoutes');
 const serviceRoutes = require('./routes/serviceRoutes')
 const timesheetRoutes = require('./routes/timesheetRoutes')
 const cors = require('cors');
-
+const path = require('path');
 
 const dotenv = require('dotenv');
 
@@ -25,6 +25,9 @@ app.use('/api/tasks', taskRoutes);
 app.use('/api/taskcategories', dbRoutes);
 app.use('/api/servicecalls', serviceRoutes);
 app.use('/api/timesheet',timesheetRoutes)
+
+// Serve the profile folder as static files
+app.use('/profile', express.static(path.join(__dirname, 'profile')));
 
 const PORT = process.env.APP_PORT;
 app.listen(PORT, () => {
